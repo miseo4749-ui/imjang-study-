@@ -288,6 +288,57 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
 }
 .btn-ghost:hover { background: var(--surf3); color: var(--text); }
 
+/* ── USER BADGE ── */
+.user-badge {
+  display: flex; align-items: center; gap: 8px;
+}
+.user-avatar {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.user-name { font-size: 13px; font-weight: 500; color: var(--text); }
+.user-change-btn {
+  font-size: 11px; color: var(--text3); background: none;
+  border: 1px solid var(--border); border-radius: 20px;
+  padding: 3px 10px; cursor: pointer; font-family: inherit;
+  transition: all 0.15s;
+}
+.user-change-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── USER SELECT POPUP ── */
+.user-popup-bg {
+  position: fixed; inset: 0; background: #00000099;
+  z-index: 300; display: flex; align-items: center; justify-content: center;
+}
+.user-popup {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 16px; padding: 32px 28px; width: 360px;
+  text-align: center;
+}
+.user-popup h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+.user-popup p { font-size: 13px; color: var(--text2); margin-bottom: 24px; }
+.user-input-wrap { display: flex; flex-direction: column; gap: 10px; }
+.user-input-wrap input, .user-input-wrap select {
+  background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 11px 14px;
+  color: var(--text); font-family: inherit; font-size: 14px;
+  width: 100%;
+}
+.user-input-wrap input:focus, .user-input-wrap select:focus {
+  outline: none; border-color: var(--accent);
+}
+.user-confirm-btn {
+  width: 100%; margin-top: 16px; padding: 12px;
+  background: var(--accent); color: #fff;
+  border: none; border-radius: var(--r-sm);
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: background 0.15s;
+}
+.user-confirm-btn:hover { background: #2e6eef; }
+
 /* ── TOAST ── */
 .toast {
   position: fixed; top: 20px; right: 24px; z-index: 200;
@@ -340,12 +391,31 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
 </head>
 <body>
 
+<!-- USER SELECT POPUP -->
+<div class="user-popup-bg" id="user-popup-bg">
+  <div class="user-popup">
+    <h2>👋 안녕하세요!</h2>
+    <p>이름을 입력하거나 기존 이름을 선택해줘요.<br>입력 내용에 누가 작성했는지 기록돼요.</p>
+    <div class="user-input-wrap">
+      <select id="user-select" onchange="onUserSelectChange()">
+        <option value="">-- 직접 입력 --</option>
+      </select>
+      <input id="user-name-input" type="text" placeholder="이름 직접 입력 (예: 미서)">
+    </div>
+    <button class="user-confirm-btn" onclick="confirmUser()">시작하기</button>
+  </div>
+</div>
+
 <!-- TOP NAV -->
 <div class="topnav">
   <div class="topnav-logo">🏘 임장노트 <span>손품·발품 입력</span></div>
-  <div class="topnav-links">
-    <a href="임장_대시보드.html">대시보드 →</a>
-    <a href="#" class="here">입력 폼</a>
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="user-badge">
+      <div class="user-avatar" id="nav-avatar">?</div>
+      <span class="user-name" id="nav-username">로딩 중...</span>
+      <button class="user-change-btn" onclick="openUserPopup()">변경</button>
+    </div>
+    <a href="dashboard.html" class="topnav-links" style="padding:6px 14px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;">대시보드 →</a>
   </div>
 </div>
 
@@ -480,8 +550,8 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
     <div class="guide-card">
       <div class="guide-icon">📊</div>
       <div>
-        <div class="guide-title">선택하신 지역의 아파트 시세 정보를 입력해 주세요.</div>
-        <div class="guide-body">가격 순으로 정렬하여 동네의 서열을 파악하고, 상권/학원가와의 관계를 체크하는 단계입니다. 갭(Gap)은 자동 계산됩니다.</div>
+        <div class="guide-title">호갱노노 앱으로 시세를 조회하고 입력해 주세요.</div>
+        <div class="guide-body">📱 <strong>호갱노노</strong> 앱을 열고 선택한 동네를 검색하세요. 아파트별 평당가·매매호가·전세호가를 확인한 뒤 아래 표에 입력하면 갭(Gap)이 자동 계산되고 평당가 순으로 자동 정렬됩니다.</div>
       </div>
     </div>
 
@@ -713,6 +783,84 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
+// --------------------------------
+// 사용자 관리
+// --------------------------------
+const USER_KEY = 'imjang_user';
+const USER_LIST_KEY = 'imjang_user_list';
+var currentUser = localStorage.getItem(USER_KEY) || '';
+
+function getUserList() {
+  return JSON.parse(localStorage.getItem(USER_LIST_KEY) || '[]');
+}
+function saveUserList(list) {
+  localStorage.setItem(USER_LIST_KEY, JSON.stringify(list));
+}
+function addUserToList(name) {
+  var list = getUserList();
+  if (name && !list.includes(name)) {
+    list.push(name);
+    saveUserList(list);
+  }
+}
+function openUserPopup() {
+  var list = getUserList();
+  var sel = document.getElementById('user-select');
+  sel.innerHTML = '<option value="">-- 직접 입력 --</option>';
+  list.forEach(function(n) {
+    var o = document.createElement('option');
+    o.value = n; o.textContent = n;
+    if (n === currentUser) o.selected = true;
+    sel.appendChild(o);
+  });
+  var input = document.getElementById('user-name-input');
+  if (currentUser && list.includes(currentUser)) {
+    input.style.display = 'none';
+    input.value = '';
+  } else {
+    input.style.display = 'block';
+    input.value = currentUser || '';
+  }
+  document.getElementById('user-popup-bg').style.display = 'flex';
+}
+function onUserSelectChange() {
+  var val = document.getElementById('user-select').value;
+  var input = document.getElementById('user-name-input');
+  if (val) {
+    input.style.display = 'none';
+    input.value = '';
+  } else {
+    input.style.display = 'block';
+    input.focus();
+  }
+}
+function confirmUser() {
+  var sel = document.getElementById('user-select').value;
+  var input = document.getElementById('user-name-input').value.trim();
+  var name = sel || input;
+  if (!name) { alert('이름을 입력해주세요!'); return; }
+  currentUser = name;
+  localStorage.setItem(USER_KEY, name);
+  addUserToList(name);
+  updateNavUser();
+  document.getElementById('user-popup-bg').style.display = 'none';
+  showToast('👋 ' + name + '님으로 입력합니다!');
+}
+function updateNavUser() {
+  document.getElementById('nav-username').textContent = currentUser || '미설정';
+  document.getElementById('nav-avatar').textContent = currentUser ? currentUser[0] : '?';
+}
+window.addEventListener('load', function() {
+  updateNavUser();
+  if (!currentUser) openUserPopup();
+});
+</script>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
 // ────────────────────────────────
 // FIREBASE 초기화
 // ────────────────────────────────
@@ -760,18 +908,23 @@ REF.on('value', (snapshot) => {
   // 탭 done 상태 갱신
   refreshDoneTabs();
   const status = document.getElementById('save-status');
-  status.textContent = '🔄 친구가 업데이트했어요 · ' + new Date().toLocaleTimeString('ko-KR');
+  const updater = D.lastUpdatedBy || '친구';
+  if (!isSyncing) return; // 내가 저장한 건 아래 save()에서 처리
+  status.textContent = '🔄 ' + updater + '님이 업데이트했어요';
   status.className = 'save-status saved';
   setTimeout(() => { isSyncing = false; }, 300);
 });
 
 function save() {
+  // 작성자 기록
+  D.lastUpdatedBy = currentUser || '익명';
+  D.lastUpdatedAt = new Date().toLocaleTimeString('ko-KR');
   // 로컬 저장
   localStorage.setItem(KEY, JSON.stringify(D));
-  // Firebase 저장 (친구에게 실시간 반영)
+  // Firebase 저장
   REF.set(D).then(() => {
     const status = document.getElementById('save-status');
-    status.textContent = '✅ 저장됨 · ' + new Date().toLocaleTimeString('ko-KR');
+    status.textContent = '✅ ' + (currentUser || '익명') + ' · ' + D.lastUpdatedAt + ' 저장됨';
     status.className = 'save-status saved';
   }).catch((err) => {
     console.error(err);
