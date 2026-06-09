@@ -951,10 +951,10 @@ function goStep(n) {
   document.getElementById('step-' + n).classList.add('active');
   document.querySelector(`[data-step="${n}"]`).classList.add('active');
   currentStep = n;
+  loadStepData(n);
   if (n === 3) renderSlots();
   if (n === 4) renderReviewTabs();
   if (n === 6) renderFieldTabs();
-  loadStepData(n);
   window.scrollTo(0,0);
 }
 function saveCurrentStep() { saveStep(currentStep); }
@@ -1170,6 +1170,10 @@ function updateSlot(i, key, val) { D.step3.slots[i][key] = val; save(); }
 
 function openPickPopup(slotIdx) {
   pickingSlotIdx = slotIdx;
+  // priceRows가 비어있으면 저장된 데이터에서 복원
+  if (!priceRows.length && D.step2 && D.step2.units && D.step2.units.length) {
+    priceRows = D.step2.units.map(function(r) { return Object.assign({}, r, { id: r.id || Date.now()+Math.random() }); });
+  }
   const list = document.getElementById('popup-unit-list');
   if (!priceRows.length) {
     list.innerHTML = '<div style="color:var(--text2);font-size:13px;">2단계에서 단지를 먼저 입력해 주세요.</div>';
@@ -1422,6 +1426,15 @@ function loadStepData(n) {
     document.getElementById('s2-lease-rate').value = D.step2.leaseRate || '';
     priceRows = (D.step2.units || []).map(r => ({ ...r, id: r.id || Date.now()+Math.random() }));
     if (priceRows.length) renderPriceTable();
+  }
+  if (n === 3) {
+    // D.step3.slots 복원 확인 후 renderSlots는 goStep에서 호출
+    if (!D.step3) D.step3 = { slots: [{},{},{},{}] };
+    if (!D.step3.slots) D.step3.slots = [{},{},{},{}];
+    // priceRows도 복원
+    if (!priceRows.length && D.step2 && D.step2.units && D.step2.units.length) {
+      priceRows = D.step2.units.map(r => ({ ...r, id: r.id || Date.now()+Math.random() }));
+    }
   }
   if (n === 5) {
     document.getElementById('s5-dday').value = D.step5.dday || '';
