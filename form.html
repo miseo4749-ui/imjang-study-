@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>임장노트 — 손품·발품 입력</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0f1a;
+  --surf: #131729;
+  --surf2: #1c2235;
+  --surf3: #252d42;
+  --surf4: #2e3850;
+  --border: #2a3348;
+  --accent: #3d7fff;
+  --accent-glow: #3d7fff33;
+  --gold: #f5b731;
+  --gold-dim: #f5b73120;
+  --green: #2ecc8f;
+  --red: #f05c5c;
+  --purple: #9b72f5;
+  --text: #e4e8f4;
+  --text2: #8892aa;
+  --text3: #4a5470;
+  --r: 10px;
+  --r-sm: 6px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ── TOP NAV ── */
+.topnav {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 28px; height: 56px;
+}
+.topnav-logo { font-size: 15px; font-weight: 700; color: var(--gold); }
+.topnav-logo span { color: var(--text2); font-weight: 400; font-size: 13px; margin-left: 8px; }
+.topnav-links { display: flex; gap: 6px; }
+.topnav-links a {
+  padding: 6px 14px; border-radius: var(--r-sm); font-size: 13px;
+  color: var(--text2); text-decoration: none; transition: all 0.15s;
+}
+.topnav-links a:hover { background: var(--surf3); color: var(--text); }
+.topnav-links a.here { background: var(--surf3); color: var(--accent); font-weight: 500; }
+
+/* ── STEP PROGRESS ── */
+.step-wrap {
+  background: var(--surf);
+  border-bottom: 1px solid var(--border);
+  padding: 0 28px;
+  display: flex; gap: 0; overflow-x: auto;
+}
+.step-tab {
+  padding: 14px 20px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text3);
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 7px;
+}
+.step-tab:hover { color: var(--text2); }
+.step-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+.step-tab.done { color: var(--green); }
+.step-tab .badge {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--surf3); color: var(--text3);
+  font-size: 10px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.step-tab.active .badge { background: var(--accent-glow); color: var(--accent); }
+.step-tab.done .badge { background: #1a3d2b; color: var(--green); }
+
+/* ── MAIN LAYOUT ── */
+.main-wrap {
+  max-width: 820px; margin: 0 auto;
+  padding: 36px 28px 80px;
+}
+
+/* ── GUIDE CARD ── */
+.guide-card {
+  background: linear-gradient(135deg, #1a2540, #1c2a3e);
+  border: 1px solid #2a4060;
+  border-radius: var(--r);
+  padding: 20px 24px;
+  margin-bottom: 28px;
+  display: flex; gap: 14px; align-items: flex-start;
+}
+.guide-icon { font-size: 24px; flex-shrink: 0; margin-top: 2px; }
+.guide-title { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 5px; }
+.guide-body { font-size: 13px; color: var(--text2); line-height: 1.7; }
+
+/* ── SECTION ── */
+.form-section {
+  background: var(--surf);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 22px 24px;
+  margin-bottom: 16px;
+}
+.form-section-title {
+  font-size: 12px; font-weight: 600;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+  margin-bottom: 18px;
+  display: flex; align-items: center; gap: 8px;
+}
+.form-section-title::after {
+  content: ''; flex: 1; height: 1px; background: var(--border);
+}
+
+/* ── FORM ELEMENTS ── */
+.frow { display: grid; gap: 14px; margin-bottom: 14px; }
+.frow.col2 { grid-template-columns: 1fr 1fr; }
+.frow.col3 { grid-template-columns: 1fr 1fr 1fr; }
+.frow:last-child { margin-bottom: 0; }
+.fg { display: flex; flex-direction: column; gap: 6px; }
+.fg label { font-size: 12px; color: var(--text2); font-weight: 500; }
+.fg label .req { color: var(--accent); margin-left: 2px; }
+.fi {
+  background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 10px 12px;
+  color: var(--text); font-family: inherit; font-size: 13px;
+  transition: border-color 0.15s; width: 100%;
+}
+.fi:focus { outline: none; border-color: var(--accent); }
+.fi::placeholder { color: var(--text3); }
+select.fi option { background: var(--surf2); }
+textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
+
+/* ── DROPDOWN GROUP (시/구/동) ── */
+.addr-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+/* ── TAG INPUT ── */
+.tag-wrap {
+  background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 8px 10px;
+  display: flex; flex-wrap: wrap; gap: 6px; cursor: text;
+  min-height: 44px; transition: border-color 0.15s;
+}
+.tag-wrap:focus-within { border-color: var(--accent); }
+.tag-item {
+  background: var(--surf4); color: var(--text);
+  padding: 3px 10px; border-radius: 20px; font-size: 12px;
+  display: flex; align-items: center; gap: 5px;
+}
+.tag-item .tag-x { cursor: pointer; color: var(--text3); font-size: 14px; line-height: 1; }
+.tag-item .tag-x:hover { color: var(--red); }
+.tag-input-inner {
+  border: none; background: transparent; color: var(--text);
+  font-family: inherit; font-size: 13px; outline: none;
+  flex: 1; min-width: 120px; padding: 3px 2px;
+}
+.tag-input-inner::placeholder { color: var(--text3); }
+.tag-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+
+/* ── INLINE CHECKBOX / RADIO ── */
+.radio-group { display: flex; gap: 8px; flex-wrap: wrap; }
+.radio-btn {
+  padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+  background: var(--surf2); color: var(--text2); cursor: pointer;
+  font-size: 12px; font-weight: 500; transition: all 0.15s; user-select: none;
+}
+.radio-btn:hover { border-color: var(--accent); color: var(--text); }
+.radio-btn.sel { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+
+/* ── DYNAMIC TABLE ── */
+.dyn-table-wrap { overflow-x: auto; }
+.dyn-table {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.dyn-table th {
+  background: var(--surf3); color: var(--text2); font-size: 11px;
+  font-weight: 600; text-align: left; padding: 9px 10px;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+.dyn-table td { padding: 6px 5px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.dyn-table tr:last-child td { border-bottom: none; }
+.dyn-table .fi { padding: 7px 9px; }
+.dyn-table .auto-val {
+  color: var(--gold); font-weight: 600; font-size: 13px;
+  padding: 7px 10px; white-space: nowrap;
+}
+.add-row-btn {
+  width: 100%; margin-top: 10px;
+  padding: 9px; border-radius: var(--r-sm);
+  border: 1px dashed var(--border); background: transparent;
+  color: var(--text3); cursor: pointer; font-size: 13px; font-family: inherit;
+  transition: all 0.15s;
+}
+.add-row-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+
+/* ── 3단계 슬롯 ── */
+.slot-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.slot-card {
+  background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r); padding: 16px;
+}
+.slot-card-head {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.slot-num {
+  width: 26px; height: 26px; border-radius: 50%;
+  background: var(--surf3); color: var(--text2);
+  font-size: 12px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.slot-num.filled { background: var(--accent-glow); color: var(--accent); }
+.slot-title { font-size: 14px; font-weight: 600; }
+.slot-pick-btn {
+  width: 100%; padding: 8px; border-radius: var(--r-sm);
+  border: 1px dashed var(--border); background: transparent;
+  color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit;
+  transition: all 0.15s; margin-top: 8px;
+}
+.slot-pick-btn:hover { border-color: var(--accent); color: var(--accent); }
+.slot-filled-name {
+  font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px;
+}
+
+/* ── 4단계 탭 ── */
+.unit-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.unit-tab {
+  padding: 7px 16px; border-radius: 20px;
+  border: 1px solid var(--border); background: var(--surf2);
+  color: var(--text2); cursor: pointer; font-size: 13px; font-family: inherit;
+  transition: all 0.15s;
+}
+.unit-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); font-weight: 500; }
+.unit-tab-content { display: none; }
+.unit-tab-content.active { display: block; }
+
+/* ── 발품 별점 ── */
+.star-row { display: flex; gap: 16px; flex-wrap: wrap; }
+.star-group { flex: 1; min-width: 140px; }
+.star-group label { font-size: 12px; color: var(--text2); display: block; margin-bottom: 6px; }
+.stars { display: flex; gap: 3px; }
+.stars span {
+  font-size: 26px; cursor: pointer; color: var(--text3);
+  transition: color 0.1s; user-select: none;
+}
+.stars span.on { color: var(--gold); }
+
+/* ── MOOD BUTTONS ── */
+.mood-row { display: flex; gap: 8px; }
+.mood-btn {
+  font-size: 22px; padding: 7px 11px;
+  background: var(--surf2); border: 2px solid transparent;
+  border-radius: var(--r-sm); cursor: pointer; transition: border-color 0.15s;
+}
+.mood-btn.sel { border-color: var(--accent); }
+
+/* ── SAVE BUTTON ── */
+.save-bar {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surf); border-top: 1px solid var(--border);
+  padding: 14px 28px;
+  display: flex; align-items: center; justify-content: space-between;
+  z-index: 40;
+}
+.save-status { font-size: 12px; color: var(--text3); }
+.save-status.saved { color: var(--green); }
+.btn-save {
+  padding: 11px 32px; border-radius: var(--r-sm);
+  border: none; background: var(--accent); color: #fff;
+  font-family: inherit; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-save:hover { background: #2e6eef; }
+.btn-save.gold { background: var(--gold); color: #1a1200; }
+.btn-save.gold:hover { background: #e0a620; }
+.btn-ghost {
+  padding: 9px 18px; border-radius: var(--r-sm);
+  border: 1px solid var(--border); background: transparent;
+  color: var(--text2); font-family: inherit; font-size: 13px;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-ghost:hover { background: var(--surf3); color: var(--text); }
+
+/* ── TOAST ── */
+.toast {
+  position: fixed; top: 20px; right: 24px; z-index: 200;
+  background: var(--green); color: #fff; font-size: 13px; font-weight: 500;
+  padding: 10px 18px; border-radius: var(--r-sm);
+  opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.toast.show { opacity: 1; }
+
+/* ── POPUP ── */
+.popup-bg {
+  display: none; position: fixed; inset: 0; background: #00000088;
+  z-index: 100; align-items: center; justify-content: center;
+}
+.popup-bg.open { display: flex; }
+.popup {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: 14px; padding: 24px; width: 480px; max-height: 80vh;
+  overflow-y: auto;
+}
+.popup h3 { font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+.popup-unit-list { display: flex; flex-direction: column; gap: 8px; }
+.popup-unit-item {
+  padding: 12px 14px; background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); cursor: pointer; transition: border-color 0.15s;
+}
+.popup-unit-item:hover { border-color: var(--accent); }
+.popup-unit-item .name { font-size: 14px; font-weight: 600; }
+.popup-unit-item .sub { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.popup-close {
+  width: 100%; margin-top: 14px; padding: 9px;
+  border: 1px solid var(--border); border-radius: var(--r-sm);
+  background: transparent; color: var(--text2); cursor: pointer; font-family: inherit;
+}
+
+/* ── STEP PAGES ── */
+.step-page { display: none; }
+.step-page.active { display: block; }
+
+/* 발품 모바일 최적화 */
+@media (max-width: 600px) {
+  .topnav { padding: 0 16px; }
+  .main-wrap { padding: 20px 16px 90px; }
+  .frow.col2, .frow.col3 { grid-template-columns: 1fr; }
+  .slot-grid { grid-template-columns: 1fr; }
+  .addr-row { grid-template-columns: 1fr; }
+  .step-wrap { padding: 0 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<div class="topnav">
+  <div class="topnav-logo">🏘 임장노트 <span>손품·발품 입력</span></div>
+  <div class="topnav-links">
+    <a href="임장_대시보드.html">대시보드 →</a>
+    <a href="#" class="here">입력 폼</a>
+  </div>
+</div>
+
+<!-- STEP TABS -->
+<div class="step-wrap">
+  <div class="step-tab active" data-step="1" onclick="goStep(1)">
+    <span class="badge">1</span> 지역 선정
+  </div>
+  <div class="step-tab" data-step="2" onclick="goStep(2)">
+    <span class="badge">2</span> 시세 조사
+  </div>
+  <div class="step-tab" data-step="3" onclick="goStep(3)">
+    <span class="badge">3</span> 타깃 단지 선정
+  </div>
+  <div class="step-tab" data-step="4" onclick="goStep(4)">
+    <span class="badge">4</span> 후기 수집
+  </div>
+  <div class="step-tab" data-step="5" onclick="goStep(5)">
+    <span class="badge">5</span> 최종 마감
+  </div>
+  <div class="step-tab" data-step="6" onclick="goStep(6)">
+    <span class="badge">🏃</span> 발품
+  </div>
+</div>
+
+<div class="main-wrap">
+
+  <!-- ══════════════════════════════
+       STEP 1: 지역 선정
+  ══════════════════════════════ -->
+  <div class="step-page active" id="step-1">
+    <div class="guide-card">
+      <div class="guide-icon">🗺️</div>
+      <div>
+        <div class="guide-title">이번 달에 정복할 서울의 동(洞)을 입력해 주세요!</div>
+        <div class="guide-body">왜 이곳을 선택했는지 서사를 기록하는 것이 핵심입니다. 나중에 대시보드에서 "우리가 왜 여기 왔었지?"를 바로 꺼내볼 수 있어요.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">📍 행정구역</div>
+      <div class="frow">
+        <div class="fg">
+          <label>지역 선택 <span class="req">*</span></label>
+          <div class="addr-row">
+            <select class="fi" id="s1-si">
+              <option value="서울특별시">서울특별시</option>
+            </select>
+            <select class="fi" id="s1-gu" onchange="updateDong()">
+              <option value="">구 선택</option>
+            </select>
+            <select class="fi" id="s1-dong">
+              <option value="">동 선택</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>지역 ID (자동완성)</label>
+          <input class="fi" id="s1-id" placeholder="예: seoul_mapo_hapjeong" readonly style="color:var(--text2)">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">💬 선정 이유</div>
+      <div class="frow">
+        <div class="fg">
+          <label>선정 배경</label>
+          <div class="radio-group" id="s1-reason-type">
+            <div class="radio-btn" onclick="radioSelect(this,'s1-reason-type')">📈 투자 유망 지역</div>
+            <div class="radio-btn" onclick="radioSelect(this,'s1-reason-type')">🏠 실거주 후보지</div>
+            <div class="radio-btn" onclick="radioSelect(this,'s1-reason-type')">👀 단순 관심 지역</div>
+          </div>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>친밀도</label>
+          <div class="radio-group" id="s1-familiarity">
+            <div class="radio-btn" onclick="radioSelect(this,'s1-familiarity')">🆕 처음 가보는 동네</div>
+            <div class="radio-btn" onclick="radioSelect(this,'s1-familiarity')">🔁 가끔 방문해 본 동네</div>
+            <div class="radio-btn" onclick="radioSelect(this,'s1-familiarity')">⭐ 아주 잘 아는 동네</div>
+          </div>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>호재 및 선정 이유 (자유롭게)</label>
+          <textarea class="fi" id="s1-reason" placeholder="예: 망원/합정 전략정비구역 호재, 2030 젊은 유동인구 많음, 6호선+2호선 더블 역세권..."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🏗️ 핵심 인프라 태그</div>
+      <div class="frow">
+        <div class="fg">
+          <label>지하철 노선</label>
+          <div class="tag-wrap" id="tag-subway" onclick="focusTagInput('tag-subway')">
+            <input class="tag-input-inner" placeholder="예: 2호선 입력 후 Enter" onkeydown="tagKeydown(event,'tag-subway')">
+          </div>
+          <div class="tag-hint">Enter 또는 쉼표(,)로 추가. '더블 역세권' 여부가 자동 감지됩니다.</div>
+        </div>
+      </div>
+      <div class="frow col2">
+        <div class="fg">
+          <label>공원/자연환경</label>
+          <div class="tag-wrap" id="tag-park" onclick="focusTagInput('tag-park')">
+            <input class="tag-input-inner" placeholder="예: 한강공원" onkeydown="tagKeydown(event,'tag-park')">
+          </div>
+        </div>
+        <div class="fg">
+          <label>주요 상권/랜드마크</label>
+          <div class="tag-wrap" id="tag-landmark" onclick="focusTagInput('tag-landmark')">
+            <input class="tag-input-inner" placeholder="예: 메세나폴리스" onkeydown="tagKeydown(event,'tag-landmark')">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-bottom:40px;">
+      <button class="btn-save" onclick="saveStep(1); goStep(2)">저장하고 2단계로 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       STEP 2: 시세 조사
+  ══════════════════════════════ -->
+  <div class="step-page" id="step-2">
+    <div class="guide-card">
+      <div class="guide-icon">📊</div>
+      <div>
+        <div class="guide-title">선택하신 지역의 아파트 시세 정보를 입력해 주세요.</div>
+        <div class="guide-body">가격 순으로 정렬하여 동네의 서열을 파악하고, 상권/학원가와의 관계를 체크하는 단계입니다. 갭(Gap)은 자동 계산됩니다.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🏘️ 동네 요약</div>
+      <div class="frow col2">
+        <div class="fg">
+          <label>평균 평당가 (만원)</label>
+          <input class="fi" id="s2-avg-price" type="number" placeholder="예: 5500">
+        </div>
+        <div class="fg">
+          <label>평균 전세가율 (%)</label>
+          <input class="fi" id="s2-lease-rate" type="number" placeholder="예: 55">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🏢 단지 시세 리스트</div>
+      <div class="dyn-table-wrap">
+        <table class="dyn-table" id="price-table">
+          <thead>
+            <tr>
+              <th>아파트명</th>
+              <th>평당가(만)</th>
+              <th>매매호가(억)</th>
+              <th>전세호가(억)</th>
+              <th>갭(자동)</th>
+              <th>상권/학원가</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="price-tbody"></tbody>
+        </table>
+      </div>
+      <button class="add-row-btn" onclick="addPriceRow()">＋ 단지 추가</button>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:40px;">
+      <button class="btn-ghost" onclick="goStep(1)">← 이전</button>
+      <button class="btn-save" onclick="saveStep(2); goStep(3)">저장하고 3단계로 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       STEP 3: 타깃 단지 선정
+  ══════════════════════════════ -->
+  <div class="step-page" id="step-3">
+    <div class="guide-card">
+      <div class="guide-icon">🎯</div>
+      <div>
+        <div class="guide-title">발품 팔 4개의 핵심 단지를 엄선해 주세요.</div>
+        <div class="guide-body">왕관 아파트, 500세대 이상 우량 단지, 가성비 단지를 골고루 섞는 것이 공부 효과를 극대화합니다.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🏠 4대 타깃 단지</div>
+      <div class="slot-grid" id="slot-grid">
+        <!-- JS로 렌더링 -->
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:40px;">
+      <button class="btn-ghost" onclick="goStep(2)">← 이전</button>
+      <button class="btn-save" onclick="saveStep(3); goStep(4)">저장하고 4단계로 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       STEP 4: 후기 수집
+  ══════════════════════════════ -->
+  <div class="step-page" id="step-4">
+    <div class="guide-card">
+      <div class="guide-icon">🔍</div>
+      <div>
+        <div class="guide-title">선정하신 4개 단지의 실거주 후기를 분석할 차례입니다.</div>
+        <div class="guide-body">블라인드·부동산 카페의 날것 의견 중 '진짜 정보'만 추려서 장단점 키워드로 등록하세요. 현장 체크리스트가 자동 생성됩니다.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">📝 단지별 후기 입력</div>
+      <div class="unit-tabs" id="unit-tabs"></div>
+      <div id="unit-tab-contents"></div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:40px;">
+      <button class="btn-ghost" onclick="goStep(3)">← 이전</button>
+      <button class="btn-save" onclick="saveStep(4); goStep(5)">저장하고 5단계로 →</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       STEP 5: 최종 마감
+  ══════════════════════════════ -->
+  <div class="step-page" id="step-5">
+    <div class="guide-card">
+      <div class="guide-icon">🏁</div>
+      <div>
+        <div class="guide-title">3주간의 손품 대장정이 끝났습니다!</div>
+        <div class="guide-body">다음 주 실전 발품을 위해 최종 취합된 리포트 파일과 현장 동선을 등록해 주세요.</div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">📅 임장 D-Day</div>
+      <div class="frow">
+        <div class="fg">
+          <label>임장 날짜 <span class="req">*</span></label>
+          <input class="fi" type="date" id="s5-dday">
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">🗺️ 발품 동선</div>
+      <div class="frow">
+        <div class="fg">
+          <label>출발 역/장소</label>
+          <input class="fi" id="s5-start" placeholder="예: 합정역 2번 출구">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>네이버 지도 동선 공유 링크</label>
+          <input class="fi" id="s5-naver-link" placeholder="네이버 지도에서 경로 공유 후 링크 붙여넣기">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>동선 메모 (4개 단지 순서)</label>
+          <textarea class="fi" id="s5-route" placeholder="예: 합정역 → 합정현대 → 학원가 → 마포래미안 → 맛집"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-section">
+      <div class="form-section-title">📂 손품 리포트</div>
+      <div class="frow">
+        <div class="fg">
+          <label>리포트 파일 첨부 (1MB 이하)</label>
+          <input class="fi" type="file" id="s5-file" accept=".pdf,.hwp,.xlsx,.docx">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>최종 메모</label>
+          <textarea class="fi" id="s5-memo" placeholder="이번 임장에서 반드시 확인하고 싶은 것들을 자유롭게 적어두세요."></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;margin-bottom:40px;">
+      <button class="btn-ghost" onclick="goStep(4)">← 이전</button>
+      <button class="btn-save gold" onclick="saveStep(5); showToast('🎉 손품 완료! 발품 준비가 됐어요.')">✅ 손품 완료 — 발품 대기!</button>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════
+       STEP 6: 발품 (모바일 최적화)
+  ══════════════════════════════ -->
+  <div class="step-page" id="step-6">
+    <div class="guide-card" style="background:linear-gradient(135deg,#1a2e1a,#1a2e24);">
+      <div class="guide-icon">🏃‍♀️</div>
+      <div>
+        <div class="guide-title" id="field-guide-title">현장 발품 기록 모드</div>
+        <div class="guide-body">선정한 4개 단지를 동선 순서대로 확인하며 툭툭 터치해 주세요!</div>
+      </div>
+    </div>
+
+    <!-- 단지 탭 -->
+    <div class="unit-tabs" id="field-unit-tabs"></div>
+    <div id="field-tab-contents"></div>
+
+    <!-- 맛집 등록 -->
+    <div class="form-section" style="border-color:#2a4030;">
+      <div class="form-section-title">🍽️ 오늘의 임장 맛집·카페</div>
+      <div class="frow col2">
+        <div class="fg">
+          <label>상호명</label>
+          <input class="fi" id="f-food-name" placeholder="예: 연남동 000카페">
+        </div>
+        <div class="fg">
+          <label>추천 메뉴</label>
+          <input class="fi" id="f-food-menu" placeholder="예: 아인슈페너">
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label>메모</label>
+          <input class="fi" id="f-food-memo" placeholder="예: 2층이 뷰 좋음, 웨이팅 30분">
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:40px;">
+      <button class="btn-save gold" style="width:100%;padding:16px;font-size:15px;" onclick="completeField()">
+        🔴 임장 완료 — 합정동 정복!
+      </button>
+    </div>
+  </div>
+
+</div><!-- /main-wrap -->
+
+<!-- SAVE BAR -->
+<div class="save-bar">
+  <div class="save-status" id="save-status">자동저장 대기 중</div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn-ghost" onclick="clearAll()" style="font-size:12px;">초기화</button>
+    <button class="btn-save" onclick="saveCurrentStep()">저장</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- POPUP: 단지 선택 -->
+<div class="popup-bg" id="popup-pick">
+  <div class="popup">
+    <h3>단지 선택</h3>
+    <div class="popup-unit-list" id="popup-unit-list"></div>
+    <button class="popup-close" onclick="closePopup()">닫기</button>
+  </div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// ────────────────────────────────
+// FIREBASE 초기화
+// ────────────────────────────────
+const firebaseConfig = {
+  apiKey: "AIzaSyDRnkAIYNXsKq77wE53y0qh2f92TT4zhxE",
+  authDomain: "imjang-study.firebaseapp.com",
+  databaseURL: "https://imjang-study-default-rtdb.firebaseio.com",
+  projectId: "imjang-study",
+  storageBucket: "imjang-study.firebasestorage.app",
+  messagingSenderId: "380004830246",
+  appId: "1:380004830246:web:4fe6955019b51b5425eae7"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const REF = db.ref('imjang');
+
+// ────────────────────────────────
+// DATA MODEL
+// ────────────────────────────────
+const KEY = 'imjang_data';
+let D = JSON.parse(localStorage.getItem(KEY) || '{}');
+let isSyncing = false; // Firebase → 로컬 반영 중 플래그
+
+// defaults
+if (!D.step1) D.step1 = { gu:'', dong:'', id:'', reasonType:'', familiarity:'', reason:'', subway:[], park:[], landmark:[] };
+if (!D.step2) D.step2 = { avgPrice:'', leaseRate:'', units:[] };
+if (!D.step3) D.step3 = { slots: [{},{},{},{}] };
+if (!D.step4) D.step4 = { reviews: [{},{},{},{}] };
+if (!D.step5) D.step5 = { dday:'', start:'', naverLink:'', route:'', memo:'', done:false };
+if (!D.step6) D.step6 = { units:[{},{},{},{}], food:{} };
+if (!D.doneDongs) D.doneDongs = [];
+
+// Firebase 실시간 수신 — 친구가 저장하면 내 화면도 자동 반영
+REF.on('value', (snapshot) => {
+  const remote = snapshot.val();
+  if (!remote) return;
+  isSyncing = true;
+  D = remote;
+  localStorage.setItem(KEY, JSON.stringify(D));
+  // 현재 열린 스텝 UI 갱신
+  loadStepData(currentStep);
+  if (currentStep === 3) renderSlots();
+  if (currentStep === 4) renderReviewTabs();
+  if (currentStep === 6) renderFieldTabs();
+  // 탭 done 상태 갱신
+  refreshDoneTabs();
+  const status = document.getElementById('save-status');
+  status.textContent = '🔄 친구가 업데이트했어요 · ' + new Date().toLocaleTimeString('ko-KR');
+  status.className = 'save-status saved';
+  setTimeout(() => { isSyncing = false; }, 300);
+});
+
+function save() {
+  // 로컬 저장
+  localStorage.setItem(KEY, JSON.stringify(D));
+  // Firebase 저장 (친구에게 실시간 반영)
+  REF.set(D).then(() => {
+    const status = document.getElementById('save-status');
+    status.textContent = '✅ 저장됨 · ' + new Date().toLocaleTimeString('ko-KR');
+    status.className = 'save-status saved';
+  }).catch((err) => {
+    console.error(err);
+    document.getElementById('save-status').textContent = '⚠️ 저장 실패 — 인터넷 확인';
+  });
+}
+
+function refreshDoneTabs() {
+  if (D.step1?.dong) markTabDone(1);
+  if (D.step2?.units?.length) markTabDone(2);
+  if (D.step3?.slots?.some(s=>s.name)) markTabDone(3);
+  if (D.step4?.reviews?.some(r=>r.pros?.length||r.cons?.length)) markTabDone(4);
+  if (D.step5?.dday) markTabDone(5);
+  if (D.step5?.done) markTabDone(6);
+}
+
+// ────────────────────────────────
+// NAVIGATION
+// ────────────────────────────────
+let currentStep = 1;
+function goStep(n) {
+  document.querySelectorAll('.step-page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.step-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('step-' + n).classList.add('active');
+  document.querySelector(`[data-step="${n}"]`).classList.add('active');
+  currentStep = n;
+  if (n === 3) renderSlots();
+  if (n === 4) renderReviewTabs();
+  if (n === 6) renderFieldTabs();
+  loadStepData(n);
+  window.scrollTo(0,0);
+}
+function saveCurrentStep() { saveStep(currentStep); }
+
+// ────────────────────────────────
+// STEP 1
+// ────────────────────────────────
+const GU_DONG = {
+  '종로구': ['청운효자동','사직동','삼청동','부암동','평창동','무악동','교남동','가회동','종로1234가동','종로56가동','이화동','혜화동','창신1동','창신2동','창신3동','숭인1동','숭인2동'],
+  '중구': ['소공동','회현동','명동','필동','장충동','광희동','을지로동','신당동','다산동','약수동','청구동','동화동','황학동','중림동'],
+  '용산구': ['후암동','용산2가동','남영동','청파동','원효로1동','원효로2동','효창동','용문동','한강로동','이촌1동','이촌2동','이태원1동','이태원2동','한남동','서빙고동','보광동'],
+  '성동구': ['왕십리2동','왕십리도선동','마장동','사근동','행당1동','행당2동','응봉동','금호1가동','금호23가동','금호4가동','옥수동','성수1가1동','성수1가2동','성수2가1동','성수2가3동','송정동','용답동'],
+  '광진구': ['중곡1동','중곡2동','중곡3동','중곡4동','능동','구의1동','구의2동','구의3동','광장동','자양1동','자양2동','자양3동','자양4동','화양동','군자동'],
+  '동대문구': ['용신동','제기동','전농1동','전농2동','답십리1동','답십리2동','장안1동','장안2동','청량리동','회기동','휘경1동','휘경2동','이문1동','이문2동'],
+  '중랑구': ['면목본동','면목2동','면목38동','면목4동','면목5동','면목7동','상봉1동','상봉2동','중화1동','중화2동','묵1동','묵2동','망우본동','망우3동','신내1동','신내2동'],
+  '성북구': ['성북동','삼선동','동선동','안암동','보문동','정릉1동','정릉2동','정릉3동','정릉4동','길음1동','길음2동','종암동','월곡1동','월곡2동','장위1동','장위2동','장위3동','석관동'],
+  '강북구': ['번1동','번2동','번3동','수유1동','수유2동','수유3동','미아동','송중동','송천동','삼양동','삼각산동','우이동','인수동'],
+  '도봉구': ['쌍문1동','쌍문2동','쌍문3동','쌍문4동','방학1동','방학2동','방학3동','창1동','창2동','창3동','창4동','창5동','도봉1동','도봉2동'],
+  '노원구': ['월계1동','월계2동','월계3동','공릉1동','공릉2동','하계1동','하계2동','중계본동','중계1동','중계23동','중계4동','상계1동','상계2동','상계34동','상계5동','상계67동','상계8동','상계9동','상계10동'],
+  '은평구': ['녹번동','불광1동','불광2동','갈현1동','갈현2동','구산동','대조동','응암1동','응암2동','응암3동','역촌동','신사1동','신사2동','증산동','수색동','진관동'],
+  '서대문구': ['천연동','북아현동','충현동','신촌동','연희동','홍제1동','홍제2동','홍제3동','홍은1동','홍은2동','남가좌1동','남가좌2동','북가좌1동','북가좌2동'],
+  '마포구': ['아현동','공덕동','도화동','용강동','대흥동','염리동','신수동','서강동','서교동','합정동','망원1동','망원2동','연남동','성산1동','성산2동','상암동'],
+  '양천구': ['신월1동','신월2동','신월3동','신월4동','신월5동','신월6동','신월7동','신정1동','신정2동','신정3동','신정4동','신정6동','신정7동','목1동','목2동','목3동','목4동','목5동'],
+  '강서구': ['염창동','등촌1동','등촌2동','등촌3동','화곡본동','화곡1동','화곡2동','화곡3동','화곡4동','화곡6동','화곡8동','가양1동','가양2동','가양3동','마곡동','발산1동','공항동','방화1동','방화2동','방화3동'],
+  '구로구': ['신도림동','구로1동','구로2동','구로3동','구로4동','구로5동','가리봉동','고척1동','고척2동','개봉1동','개봉2동','개봉3동','오류1동','오류2동','궁동','수궁동'],
+  '금천구': ['가산동','독산1동','독산2동','독산3동','독산4동','시흥1동','시흥2동','시흥3동','시흥4동','시흥5동'],
+  '영등포구': ['영등포동','영등포본동','당산1동','당산2동','문래동','양평1동','양평2동','신길1동','신길3동','신길4동','신길5동','신길6동','신길7동','대림1동','대림2동','대림3동','도림동','여의도동'],
+  '동작구': ['노량진1동','노량진2동','상도1동','상도2동','상도3동','상도4동','본동','흑석동','동작동','사당1동','사당2동','사당3동','사당4동','사당5동','대방동','신대방1동','신대방2동'],
+  '관악구': ['보라매동','청림동','성현동','행운동','낙성대동','중앙동','인헌동','남현동','서원동','신원동','서림동','난향동','신림동','신사동','조원동','대학동','남부순환로','은천동','봉천동','청룡동','호암동','삼성동'],
+  '서초구': ['서초1동','서초2동','서초3동','서초4동','잠원동','반포본동','반포1동','반포2동','반포3동','반포4동','방배본동','방배1동','방배2동','방배3동','방배4동','양재1동','양재2동','내곡동'],
+  '강남구': ['신사동','논현1동','논현2동','압구정동','청담동','삼성1동','삼성2동','대치1동','대치2동','대치4동','역삼1동','역삼2동','도곡1동','도곡2동','개포1동','개포2동','개포4동','일원본동','일원1동','일원2동','수서동','세곡동'],
+  '송파구': ['풍납1동','풍납2동','거여1동','거여2동','마천1동','마천2동','방이1동','방이2동','오금동','개롱동','가락본동','가락1동','가락2동','문정1동','문정2동','장지동','잠실본동','잠실2동','잠실3동','잠실4동','잠실6동','잠실7동','석촌동','송파1동','송파2동','삼전동','가락시장','오림픽공원'],
+  '강동구': ['강일동','상일동','명일1동','명일2동','고덕1동','고덕2동','암사1동','암사2동','암사3동','성내1동','성내2동','성내3동','천호1동','천호2동','천호3동','길동','둔촌1동','둔촌2동'],
+};
+
+// 시 드롭다운 → 구 자동세팅
+document.getElementById('s1-si').addEventListener('change', function() {
+  populateGu();
+});
+
+function populateGu() {
+  const guSel = document.getElementById('s1-gu');
+  guSel.innerHTML = '<option value="">구 선택</option>';
+  Object.keys(GU_DONG).sort().forEach(g => {
+    const o = document.createElement('option'); o.value = g; o.textContent = g;
+    guSel.appendChild(o);
+  });
+  document.getElementById('s1-dong').innerHTML = '<option value="">동 선택</option>';
+  document.getElementById('s1-id').value = '';
+}
+
+// 초기 구 목록 세팅
+populateGu();
+
+function updateDong() {
+  const gu = document.getElementById('s1-gu').value;
+  const dongSel = document.getElementById('s1-dong');
+  dongSel.innerHTML = '<option value="">동 선택</option>';
+  if (GU_DONG[gu]) {
+    GU_DONG[gu].forEach(d => {
+      const o = document.createElement('option'); o.value = d; o.textContent = d;
+      dongSel.appendChild(o);
+    });
+  }
+  updateId();
+}
+
+function updateId() {
+  const gu = document.getElementById('s1-gu').value;
+  const dong = document.getElementById('s1-dong').value;
+  if (gu && dong) {
+    const guKey = gu.replace(/[구]/g,'').toLowerCase();
+    const dongKey = dong.replace(/[동\s]/g,'').toLowerCase();
+    document.getElementById('s1-id').value = `seoul_${guKey}_${dongKey}`;
+  }
+}
+
+document.getElementById('s1-gu').addEventListener('change', updateDong);
+document.getElementById('s1-dong').addEventListener('change', updateId);
+
+// Radio select
+function radioSelect(el, groupId) {
+  document.querySelectorAll(`#${groupId} .radio-btn`).forEach(b => b.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// Tag input
+function focusTagInput(id) {
+  document.querySelector(`#${id} .tag-input-inner`).focus();
+}
+function tagKeydown(e, id) {
+  if (e.key === 'Enter' || e.key === ',') {
+    e.preventDefault();
+    const input = e.target;
+    const val = input.value.trim().replace(/,$/, '');
+    if (val) addTag(id, val);
+    input.value = '';
+  } else if (e.key === 'Backspace' && e.target.value === '') {
+    const wrap = document.getElementById(id);
+    const tags = wrap.querySelectorAll('.tag-item');
+    if (tags.length) tags[tags.length-1].remove();
+  }
+}
+function addTag(containerId, val) {
+  const wrap = document.getElementById(containerId);
+  const input = wrap.querySelector('.tag-input-inner');
+  const tag = document.createElement('div');
+  tag.className = 'tag-item';
+  tag.innerHTML = `${val} <span class="tag-x" onclick="this.parentElement.remove()">×</span>`;
+  wrap.insertBefore(tag, input);
+}
+function getTags(id) {
+  return [...document.querySelectorAll(`#${id} .tag-item`)].map(t => t.textContent.replace('×','').trim());
+}
+function loadTags(id, arr) {
+  const wrap = document.getElementById(id);
+  const input = wrap.querySelector('.tag-input-inner');
+  wrap.querySelectorAll('.tag-item').forEach(t => t.remove());
+  (arr||[]).forEach(v => addTag(id, v));
+}
+
+// ────────────────────────────────
+// STEP 2: PRICE TABLE
+// ────────────────────────────────
+let priceRows = [];
+
+function addPriceRow(data) {
+  const id = Date.now() + Math.random();
+  const row = data || { id, name:'', ppu:'', sale:'', lease:'', proximity:'무난함' };
+  priceRows.push(row);
+  renderPriceTable();
+}
+function renderPriceTable() {
+  const tbody = document.getElementById('price-tbody');
+  // sort by ppu desc
+  const sorted = [...priceRows].sort((a,b) => parseFloat(b.ppu||0) - parseFloat(a.ppu||0));
+  tbody.innerHTML = sorted.map((r,i) => `
+    <tr data-id="${r.id}">
+      <td><input class="fi" style="min-width:110px" value="${r.name}" onchange="updateRow('${r.id}','name',this.value)" placeholder="단지명"></td>
+      <td><input class="fi" style="width:80px" type="number" value="${r.ppu}" onchange="updateRow('${r.id}','ppu',this.value)" placeholder="5500"></td>
+      <td><input class="fi" style="width:80px" type="number" step="0.1" value="${r.sale}" onchange="updateRow('${r.id}','sale',this.value)" placeholder="8.5"></td>
+      <td><input class="fi" style="width:80px" type="number" step="0.1" value="${r.lease}" onchange="updateRow('${r.id}','lease',this.value)" placeholder="5.0"></td>
+      <td><div class="auto-val">${calcGap(r)}</div></td>
+      <td>
+        <select class="fi" style="width:110px" onchange="updateRow('${r.id}','proximity',this.value)">
+          ${['매우 인접','무난함','소외됨'].map(v => `<option ${r.proximity===v?'selected':''}>${v}</option>`).join('')}
+        </select>
+      </td>
+      <td><button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;" onclick="removeRow('${r.id}')">×</button></td>
+    </tr>`).join('');
+}
+function calcGap(r) {
+  const s = parseFloat(r.sale); const l = parseFloat(r.lease);
+  if (!s || !l) return '—';
+  return (s - l).toFixed(1) + '억';
+}
+function updateRow(id, key, val) {
+  const r = priceRows.find(r => r.id == id);
+  if (r) { r[key] = val; renderPriceTable(); }
+}
+function removeRow(id) {
+  priceRows = priceRows.filter(r => r.id != id);
+  renderPriceTable();
+}
+
+// ────────────────────────────────
+// STEP 3: SLOTS
+// ────────────────────────────────
+const SLOT_TYPES = [
+  { key:'crown', icon:'👑', label:'지역 대장 (왕관)', hint:'호갱노노 왕관 단지, 가격 상한선 파악용' },
+  { key:'major1', icon:'🏢', label:'우량 대단지 ①', hint:'500세대↑, 인기 우량주' },
+  { key:'major2', icon:'🏢', label:'우량 대단지 ②', hint:'500세대↑, 비교군' },
+  { key:'value', icon:'💰', label:'가성비 단지', hint:'평당가 낮지만 세대수 많음, 갭투자 후보' },
+];
+let pickingSlotIdx = -1;
+
+function renderSlots() {
+  const grid = document.getElementById('slot-grid');
+  grid.innerHTML = SLOT_TYPES.map((t,i) => {
+    const slot = D.step3.slots[i] || {};
+    const filled = !!slot.name;
+    return `<div class="slot-card">
+      <div class="slot-card-head">
+        <div class="slot-num ${filled ? 'filled' : ''}">${t.icon}</div>
+        <div>
+          <div class="slot-title">${t.label}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${t.hint}</div>
+        </div>
+      </div>
+      ${filled ? `
+        <div class="slot-filled-name">📌 ${slot.name}</div>
+        <div class="frow col2" style="margin-bottom:10px;">
+          <div class="fg"><label>세대수</label>
+            <input class="fi" value="${slot.units||''}" onchange="updateSlot(${i},'units',this.value)" placeholder="000세대" type="number">
+          </div>
+          <div class="fg"><label>용적률(%)</label>
+            <input class="fi" value="${slot.floor_ratio||''}" onchange="updateSlot(${i},'floor_ratio',this.value)" placeholder="250">
+          </div>
+        </div>
+        <div class="frow" style="margin-bottom:0;">
+          <div class="fg"><label>준공년월</label>
+            <input class="fi" value="${slot.built||''}" onchange="updateSlot(${i},'built',this.value)" placeholder="2005-03">
+          </div>
+        </div>
+        <button class="slot-pick-btn" onclick="openPickPopup(${i})" style="color:var(--text3);margin-top:10px;">🔄 변경</button>
+      ` : `
+        <button class="slot-pick-btn" onclick="openPickPopup(${i})">＋ 단지 선택 (2단계 목록에서)</button>
+      `}
+    </div>`;
+  }).join('');
+}
+function updateSlot(i, key, val) { D.step3.slots[i][key] = val; save(); }
+
+function openPickPopup(slotIdx) {
+  pickingSlotIdx = slotIdx;
+  const list = document.getElementById('popup-unit-list');
+  if (!priceRows.length) {
+    list.innerHTML = '<div style="color:var(--text2);font-size:13px;">2단계에서 단지를 먼저 입력해 주세요.</div>';
+  } else {
+    list.innerHTML = priceRows.map(r => `
+      <div class="popup-unit-item" onclick="pickUnit('${r.id}')">
+        <div class="name">${r.name}</div>
+        <div class="sub">평당 ${r.ppu||'—'}만 · 매매 ${r.sale||'—'}억 · 갭 ${calcGap(r)}</div>
+      </div>`).join('');
+  }
+  document.getElementById('popup-pick').classList.add('open');
+}
+function pickUnit(rowId) {
+  const r = priceRows.find(r => r.id == rowId);
+  if (r && pickingSlotIdx >= 0) {
+    D.step3.slots[pickingSlotIdx] = { name:r.name, ppu:r.ppu, sale:r.sale, lease:r.lease, units:'', built:'', floor_ratio:'' };
+    save(); renderSlots();
+  }
+  closePopup();
+}
+function closePopup() { document.getElementById('popup-pick').classList.remove('open'); }
+
+// ────────────────────────────────
+// STEP 4: REVIEWS
+// ────────────────────────────────
+function renderReviewTabs() {
+  const slots = D.step3.slots;
+  const tabs = document.getElementById('unit-tabs');
+  const contents = document.getElementById('unit-tab-contents');
+  if (!slots.some(s => s.name)) {
+    tabs.innerHTML = '<div style="color:var(--text2);font-size:13px;">3단계에서 단지를 먼저 선정해 주세요.</div>';
+    contents.innerHTML = '';
+    return;
+  }
+  tabs.innerHTML = slots.map((s,i) => s.name ?
+    `<button class="unit-tab ${i===0?'active':''}" onclick="switchReviewTab(${i})">${s.name}</button>` : ''
+  ).join('');
+  contents.innerHTML = slots.map((s,i) => s.name ? `
+    <div class="unit-tab-content ${i===0?'active':''}" id="review-content-${i}">
+      <div class="frow"><div class="fg">
+        <label>장점 키워드 <span style="color:var(--green);font-size:11px;">#태그로 입력</span></label>
+        <div class="tag-wrap" id="tag-pro-${i}" onclick="focusTagInput('tag-pro-${i}')">
+          <input class="tag-input-inner" placeholder="#초품아 #지하주차연결 #조용함" onkeydown="tagKeydown(event,'tag-pro-${i}')">
+        </div>
+      </div></div>
+      <div class="frow"><div class="fg">
+        <label>단점/리스크 태그 <span style="color:var(--red);font-size:11px;">#현장 체크 항목이 됩니다</span></label>
+        <div class="tag-wrap" id="tag-con-${i}" onclick="focusTagInput('tag-con-${i}')">
+          <input class="tag-input-inner" placeholder="#주말소음 #경사있음 #이중주차" onkeydown="tagKeydown(event,'tag-con-${i}')">
+        </div>
+      </div></div>
+      <div class="frow"><div class="fg">
+        <label>주민 후기 종합 요약</label>
+        <textarea class="fi" id="review-summary-${i}" placeholder="2~3줄로 핵심만 요약. 이 내용이 임장 당일 가이드로 노출됩니다."></textarea>
+      </div></div>
+    </div>` : ''
+  ).join('');
+  // load saved data
+  slots.forEach((s,i) => {
+    if (!s.name) return;
+    const rv = D.step4.reviews[i] || {};
+    if (rv.pros) loadTags(`tag-pro-${i}`, rv.pros);
+    if (rv.cons) loadTags(`tag-con-${i}`, rv.cons);
+    if (rv.summary) document.getElementById(`review-summary-${i}`).value = rv.summary;
+  });
+}
+function switchReviewTab(idx) {
+  document.querySelectorAll('.unit-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.unit-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('.unit-tab')[idx]?.classList.add('active');
+  document.getElementById(`review-content-${idx}`)?.classList.add('active');
+}
+
+// ────────────────────────────────
+// STEP 6: FIELD
+// ────────────────────────────────
+function renderFieldTabs() {
+  const slots = D.step3.slots;
+  const tabs = document.getElementById('field-unit-tabs');
+  const contents = document.getElementById('field-tab-contents');
+  const dong = D.step1.dong || '지역';
+  document.getElementById('field-guide-title').textContent = `현재 ${dong} 임장 가이드 모드입니다.`;
+
+  tabs.innerHTML = slots.map((s,i) => s.name ?
+    `<button class="unit-tab ${i===0?'active':''}" onclick="switchFieldTab(${i})">${s.name}</button>` : ''
+  ).join('');
+
+  contents.innerHTML = slots.map((s,i) => {
+    if (!s.name) return '';
+    const rv = D.step4.reviews[i] || {};
+    const cons = rv.cons || [];
+    const riskHtml = cons.length ? `
+      <div style="background:#1a2a1a;border:1px solid #2a4030;border-radius:8px;padding:12px 14px;margin-bottom:14px;">
+        <div style="font-size:11px;color:var(--red);font-weight:600;margin-bottom:8px;">⚠️ 현장 체크 리스트 (후기 데이터 기반)</div>
+        ${cons.map(c => `<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">• ${c} 직접 눈으로 확인</div>`).join('')}
+      </div>` : '';
+    const fu = D.step6.units[i] || {};
+    return `<div class="unit-tab-content ${i===0?'active':''}" id="field-content-${i}">
+      ${riskHtml}
+      <div class="form-section">
+        <div class="form-section-title">⭐ 현장 별점</div>
+        <div class="star-row">
+          ${[['교통','traffic'],['학군','school'],['상권','commerce'],['환경','env']].map(([lbl,key]) => `
+            <div class="star-group">
+              <label>${lbl}</label>
+              <div class="stars" id="stars-${i}-${key}">
+                ${[1,2,3,4,5].map(n => `<span onclick="setStar(${i},'${key}',${n})" class="${(fu[key]||0)>=n?'on':''}">★</span>`).join('')}
+              </div>
+            </div>`).join('')}
+        </div>
+      </div>
+      <div class="form-section">
+        <div class="form-section-title">✏️ 현장 한 줄 평</div>
+        <div class="frow"><div class="fg">
+          <label>호가 vs 손품 괴리 여부</label>
+          <div class="radio-group" id="field-price-${i}">
+            <div class="radio-btn ${fu.priceMatch==='일치'?'sel':''}" onclick="radioSelect(this,'field-price-${i}');updateFieldVal(${i},'priceMatch','일치')">일치</div>
+            <div class="radio-btn ${fu.priceMatch==='소폭 다름'?'sel':''}" onclick="radioSelect(this,'field-price-${i}');updateFieldVal(${i},'priceMatch','소폭 다름')">소폭 다름</div>
+            <div class="radio-btn ${fu.priceMatch==='많이 다름'?'sel':''}" onclick="radioSelect(this,'field-price-${i}');updateFieldVal(${i},'priceMatch','많이 다름')">많이 다름</div>
+          </div>
+        </div></div>
+        <div class="frow"><div class="fg">
+          <label>현장 한 줄 코멘트</label>
+          <textarea class="fi" id="field-comment-${i}" placeholder="현장에서 느낀 것을 1~2줄로 남겨두세요." onchange="updateFieldVal(${i},'comment',this.value)">${fu.comment||''}</textarea>
+        </div></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+function switchFieldTab(idx) {
+  document.querySelectorAll('#field-unit-tabs .unit-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('#field-tab-contents .unit-tab-content').forEach(c => c.classList.remove('active'));
+  document.querySelectorAll('#field-unit-tabs .unit-tab')[idx]?.classList.add('active');
+  document.getElementById(`field-content-${idx}`)?.classList.add('active');
+}
+function setStar(unitIdx, key, val) {
+  if (!D.step6.units[unitIdx]) D.step6.units[unitIdx] = {};
+  D.step6.units[unitIdx][key] = val;
+  save();
+  const stars = document.querySelectorAll(`#stars-${unitIdx}-${key} span`);
+  stars.forEach((s,i) => s.classList.toggle('on', i < val));
+}
+function updateFieldVal(unitIdx, key, val) {
+  if (!D.step6.units[unitIdx]) D.step6.units[unitIdx] = {};
+  D.step6.units[unitIdx][key] = val;
+  save();
+}
+
+function completeField() {
+  D.step6.food = {
+    name: document.getElementById('f-food-name').value,
+    menu: document.getElementById('f-food-menu').value,
+    memo: document.getElementById('f-food-memo').value,
+  };
+  // mark dong as done
+  const dongId = D.step1.id;
+  if (dongId && !D.doneDongs.includes(dongId)) D.doneDongs.push(dongId);
+  D.step5.done = true;
+  save();
+  showToast('🎉 ' + (D.step1.dong||'지역') + ' 정복 완료! 대시보드에서 확인하세요.');
+  // mark tabs done
+  document.querySelector('[data-step="6"]').classList.add('done');
+}
+
+// ────────────────────────────────
+// SAVE / LOAD
+// ────────────────────────────────
+function saveStep(n) {
+  if (n === 1) {
+    D.step1.gu = document.getElementById('s1-gu').value;
+    D.step1.dong = document.getElementById('s1-dong').value;
+    D.step1.id = document.getElementById('s1-id').value;
+    D.step1.reasonType = document.querySelector('#s1-reason-type .sel')?.textContent || '';
+    D.step1.familiarity = document.querySelector('#s1-familiarity .sel')?.textContent || '';
+    D.step1.reason = document.getElementById('s1-reason').value;
+    D.step1.subway = getTags('tag-subway');
+    D.step1.park = getTags('tag-park');
+    D.step1.landmark = getTags('tag-landmark');
+    // auto double station
+    D.step1.doubleStation = D.step1.subway.length >= 2;
+  }
+  if (n === 2) {
+    D.step2.avgPrice = document.getElementById('s2-avg-price').value;
+    D.step2.leaseRate = document.getElementById('s2-lease-rate').value;
+    D.step2.units = priceRows;
+  }
+  if (n === 3) {
+    // slots saved live
+  }
+  if (n === 4) {
+    D.step3.slots.forEach((s,i) => {
+      if (!s.name) return;
+      D.step4.reviews[i] = {
+        pros: getTags(`tag-pro-${i}`),
+        cons: getTags(`tag-con-${i}`),
+        summary: document.getElementById(`review-summary-${i}`)?.value || '',
+      };
+    });
+  }
+  if (n === 5) {
+    D.step5.dday = document.getElementById('s5-dday').value;
+    D.step5.start = document.getElementById('s5-start').value;
+    D.step5.naverLink = document.getElementById('s5-naver-link').value;
+    D.step5.route = document.getElementById('s5-route').value;
+    D.step5.memo = document.getElementById('s5-memo').value;
+  }
+  if (n === 6) {
+    D.step6.food = {
+      name: document.getElementById('f-food-name')?.value || '',
+      menu: document.getElementById('f-food-menu')?.value || '',
+      memo: document.getElementById('f-food-memo')?.value || '',
+    };
+  }
+  save();
+  markTabDone(n);
+}
+
+function markTabDone(n) {
+  const tab = document.querySelector(`[data-step="${n}"]`);
+  if (tab) tab.classList.add('done');
+}
+
+function loadStepData(n) {
+  if (n === 1) {
+    // 구 목록 먼저 채우고 → 저장된 값 세팅
+    populateGu();
+    if (D.step1.gu) {
+      document.getElementById('s1-gu').value = D.step1.gu;
+      updateDong(); // 동 목록 채우기
+    }
+    if (D.step1.dong) document.getElementById('s1-dong').value = D.step1.dong;
+    if (D.step1.id) document.getElementById('s1-id').value = D.step1.id;
+    document.getElementById('s1-reason').value = D.step1.reason || '';
+    loadTags('tag-subway', D.step1.subway);
+    loadTags('tag-park', D.step1.park);
+    loadTags('tag-landmark', D.step1.landmark);
+    if (D.step1.reasonType) {
+      document.querySelectorAll('#s1-reason-type .radio-btn').forEach(b => {
+        if (b.textContent.trim() === D.step1.reasonType) b.classList.add('sel');
+      });
+    }
+    if (D.step1.familiarity) {
+      document.querySelectorAll('#s1-familiarity .radio-btn').forEach(b => {
+        if (b.textContent.trim() === D.step1.familiarity) b.classList.add('sel');
+      });
+    }
+  }
+  if (n === 2) {
+    document.getElementById('s2-avg-price').value = D.step2.avgPrice || '';
+    document.getElementById('s2-lease-rate').value = D.step2.leaseRate || '';
+    priceRows = (D.step2.units || []).map(r => ({ ...r, id: r.id || Date.now()+Math.random() }));
+    if (priceRows.length) renderPriceTable();
+  }
+  if (n === 5) {
+    document.getElementById('s5-dday').value = D.step5.dday || '';
+    document.getElementById('s5-start').value = D.step5.start || '';
+    document.getElementById('s5-naver-link').value = D.step5.naverLink || '';
+    document.getElementById('s5-route').value = D.step5.route || '';
+    document.getElementById('s5-memo').value = D.step5.memo || '';
+  }
+}
+
+function clearAll() {
+  if (!confirm('모든 데이터를 초기화하시겠어요?')) return;
+  localStorage.removeItem(KEY);
+  REF.remove().then(function() { location.reload(); });
+}
+
+// ────────────────────────────────
+// TOAST
+// ────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Firebase 실시간 수신
+REF.on('value', function(snapshot) {
+  var remote = snapshot.val();
+  if (!remote) return;
+  isSyncing = true;
+  D = remote;
+  localStorage.setItem(KEY, JSON.stringify(D));
+  loadStepData(currentStep);
+  if (currentStep === 3) renderSlots();
+  if (currentStep === 4) renderReviewTabs();
+  if (currentStep === 6) renderFieldTabs();
+  refreshDoneTabs();
+  var status = document.getElementById('save-status');
+  status.textContent = 'friend updated ' + new Date().toLocaleTimeString('ko-KR');
+  status.className = 'save-status saved';
+  setTimeout(function() { isSyncing = false; }, 300);
+});
+
+// init
+loadStepData(1);
+// check done steps
+[1,2,3,4,5].forEach(n => {
+  const d = D['step'+n];
+  if (!d) return;
+  if (n===1 && d.dong) markTabDone(1);
+  if (n===2 && d.units?.length) markTabDone(2);
+  if (n===3 && d.slots?.some(s=>s.name)) markTabDone(3);
+  if (n===4 && d.reviews?.some(r=>r.pros?.length||r.cons?.length)) markTabDone(4);
+  if (n===5 && d.dday) markTabDone(5);
+  if (D.step5?.done) markTabDone(6);
+});
+</script>
+</body>
+</html>
