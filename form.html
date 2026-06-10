@@ -1375,12 +1375,16 @@ function saveStep(n) {
     // slots saved live
   }
   if (n === 4) {
-    D.step3.slots.forEach((s,i) => {
-      if (!s.name) return;
+    // 슬롯 유무와 관계없이 DOM에 렌더된 review 탭 전체 저장
+    [0,1,2,3].forEach(i => {
+      const proEl = document.getElementById(`tag-pro-${i}`);
+      const conEl = document.getElementById(`tag-con-${i}`);
+      const sumEl = document.getElementById(`review-summary-${i}`);
+      if (!proEl && !conEl && !sumEl) return; // 해당 탭 미존재
       D.step4.reviews[i] = {
         pros: getTags(`tag-pro-${i}`),
         cons: getTags(`tag-con-${i}`),
-        summary: document.getElementById(`review-summary-${i}`)?.value || '',
+        summary: sumEl?.value || '',
       };
     });
   }
