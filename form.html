@@ -576,9 +576,10 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
           <thead>
             <tr>
               <th>아파트명</th>
-              <th>평당가(만)</th>
+              <th>평수(평)</th>
               <th>매매호가(억)</th>
               <th>전세호가(억)</th>
+              <th>평당가(만, 자동)</th>
               <th>갭(자동)</th>
               <th>상권/학원가</th>
               <th></th>
@@ -1083,20 +1084,21 @@ let priceRows = [];
 
 function addPriceRow(data) {
   const id = Date.now() + Math.random();
-  const row = data || { id, name:'', ppu:'', sale:'', lease:'', proximity:'무난함' };
+  const row = data || { id, name:'', pyeong:'', sale:'', lease:'', proximity:'무난함' };
   priceRows.push(row);
   renderPriceTable();
 }
 function renderPriceTable() {
   const tbody = document.getElementById('price-tbody');
   // sort by ppu desc
-  const sorted = [...priceRows].sort((a,b) => parseFloat(b.ppu||0) - parseFloat(a.ppu||0));
+  const sorted = [...priceRows].sort((a,b) => parsePPU(b) - parsePPU(a));
   tbody.innerHTML = sorted.map((r,i) => `
     <tr data-id="${r.id}">
       <td><input class="fi" style="min-width:110px" value="${r.name}" onchange="updateRow('${r.id}','name',this.value)" placeholder="단지명"></td>
-      <td><input class="fi" style="width:80px" type="number" value="${r.ppu}" onchange="updateRow('${r.id}','ppu',this.value)" placeholder="5500"></td>
+      <td><input class="fi" style="width:70px" type="number" value="${r.pyeong}" onchange="updateRow('${r.id}','pyeong',this.value)" placeholder="25"></td>
       <td><input class="fi" style="width:80px" type="number" step="0.1" value="${r.sale}" onchange="updateRow('${r.id}','sale',this.value)" placeholder="8.5"></td>
       <td><input class="fi" style="width:80px" type="number" step="0.1" value="${r.lease}" onchange="updateRow('${r.id}','lease',this.value)" placeholder="5.0"></td>
+      <td><div class="auto-val">${calcPPU(r)}</div></td>
       <td><div class="auto-val">${calcGap(r)}</div></td>
       <td>
         <select class="fi" style="width:110px" onchange="updateRow('${r.id}','proximity',this.value)">
@@ -1105,6 +1107,15 @@ function renderPriceTable() {
       </td>
       <td><button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:16px;" onclick="removeRow('${r.id}')">×</button></td>
     </tr>`).join('');
+}
+function parsePPU(r) {
+  const s = parseFloat(r.sale); const p = parseFloat(r.pyeong);
+  if (!s || !p) return 0;
+  return Math.round(s * 10000 / p);
+}
+function calcPPU(r) {
+  const val = parsePPU(r);
+  return val ? val.toLocaleString('ko-KR') + '만' : '—';
 }
 function calcGap(r) {
   const s = parseFloat(r.sale); const l = parseFloat(r.lease);
@@ -1181,7 +1192,7 @@ function openPickPopup(slotIdx) {
     list.innerHTML = priceRows.map(r => `
       <div class="popup-unit-item" onclick="pickUnit('${r.id}')">
         <div class="name">${r.name}</div>
-        <div class="sub">평당 ${r.ppu||'—'}만 · 매매 ${r.sale||'—'}억 · 갭 ${calcGap(r)}</div>
+        <div class="sub">평당 ${calcPPU(r)} · 매매 ${r.sale||'—'}억 · 갭 ${calcGap(r)}</div>
       </div>`).join('');
   }
   document.getElementById('popup-pick').classList.add('open');
@@ -1189,7 +1200,7 @@ function openPickPopup(slotIdx) {
 function pickUnit(rowId) {
   const r = priceRows.find(r => r.id == rowId);
   if (r && pickingSlotIdx >= 0) {
-    D.step3.slots[pickingSlotIdx] = { name:r.name, ppu:r.ppu, sale:r.sale, lease:r.lease, units:'', built:'', floor_ratio:'' };
+    D.step3.slots[pickingSlotIdx] = { name:r.name, pyeong:r.pyeong, sale:r.sale, lease:r.lease, units:'', built:'', floor_ratio:'' };
     save(); renderSlots();
   }
   closePopup();
