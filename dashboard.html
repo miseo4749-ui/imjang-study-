@@ -27,11 +27,10 @@
   --r: 10px;
   --r-sm: 6px;
 
-  /* 지역 상태 색상 */
   --color-untouched: #1c2235;
-  --color-exploring: #2a3d1a;    /* 탐색 중 - 초록 흐림 */
-  --color-pending: #3d3010;      /* 손품 완료 대기 - 골드 흐림 */
-  --color-conquered: #1a2e50;    /* 정복 완료 - 딥블루 */
+  --color-exploring: #2a3d1a;
+  --color-pending: #3d3010;
+  --color-conquered: #1a2e50;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -45,7 +44,6 @@ body {
   font-size: 14px;
 }
 
-/* ── TOP NAV ── */
 .topnav {
   height: 52px; min-height: 52px;
   background: var(--surf);
@@ -62,7 +60,6 @@ body {
 .nav-link:hover { background: var(--surf3); color: var(--text); }
 .nav-link.here { background: var(--surf3); color: var(--accent); font-weight: 500; }
 
-/* ── STATS BAR ── */
 .stats-bar {
   background: var(--surf);
   border-bottom: 1px solid var(--border);
@@ -76,7 +73,6 @@ body {
 .stat-item:first-child { padding-left: 0; }
 .stat-num { font-size: 22px; font-weight: 700; line-height: 1; }
 .stat-label { font-size: 11px; color: var(--text3); line-height: 1.3; }
-.stat-sub { font-size: 10px; color: var(--text3); }
 .conquest-bar-wrap {
   flex: 1; margin-left: 20px;
   display: flex; align-items: center; gap: 12px;
@@ -91,25 +87,16 @@ body {
 }
 .conquest-pct { font-size: 13px; font-weight: 700; color: var(--gold); white-space: nowrap; }
 
-/* ── LAYOUT: 지도 + 사이드 ── */
-.main-layout {
-  flex: 1; display: flex; overflow: hidden;
-}
+.main-layout { flex: 1; display: flex; overflow: hidden; }
 
-/* ── MAP AREA ── */
 .map-area {
   flex: 1; position: relative;
   background: var(--bg);
   display: flex; align-items: center; justify-content: center;
   overflow: hidden;
 }
-.map-container {
-  position: relative; width: 100%; height: 100%;
-}
-#seoul-svg {
-  width: 100%; height: 100%;
-  object-fit: contain;
-}
+.map-container { position: relative; width: 100%; height: 100%; }
+#seoul-svg { width: 100%; height: 100%; object-fit: contain; }
 .map-overlay-label {
   position: absolute; top: 16px; left: 16px;
   font-size: 11px; color: var(--text3);
@@ -118,7 +105,6 @@ body {
 .legend-item { display: flex; align-items: center; gap: 5px; }
 .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
 
-/* ── SIDE PANEL ── */
 .side-panel {
   width: 380px; min-width: 380px;
   border-left: 1px solid var(--border);
@@ -126,9 +112,7 @@ body {
   display: flex; flex-direction: column;
   overflow: hidden;
 }
-.side-tabs {
-  display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0;
-}
+.side-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; }
 .side-tab {
   flex: 1; padding: 12px 8px; text-align: center; font-size: 12px;
   color: var(--text3); cursor: pointer; border-bottom: 2px solid transparent;
@@ -140,14 +124,10 @@ body {
 .side-content::-webkit-scrollbar { width: 4px; }
 .side-content::-webkit-scrollbar-thumb { background: var(--surf3); border-radius: 2px; }
 
-/* ── DONG DETAIL ── */
 .dong-header { margin-bottom: 18px; }
 .dong-title { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
 .dong-badges { display: flex; gap: 6px; flex-wrap: wrap; }
-.badge {
-  font-size: 11px; padding: 3px 10px; border-radius: 20px;
-  background: var(--surf3); color: var(--text2);
-}
+.badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; background: var(--surf3); color: var(--text2); }
 .badge.accent { background: var(--accent-glow); color: var(--accent); }
 .badge.gold { background: var(--gold-dim); color: var(--gold); }
 .badge.green { background: var(--green-dim); color: var(--green); }
@@ -155,13 +135,9 @@ body {
 .info-section { margin-bottom: 20px; }
 .info-section-title {
   font-size: 11px; color: var(--text3); font-weight: 600;
-  text-transform: uppercase; letter-spacing: 0.8px;
-  margin-bottom: 10px;
+  text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;
 }
-.info-block {
-  background: var(--surf2); border-radius: var(--r-sm);
-  padding: 12px 14px; font-size: 13px; color: var(--text); line-height: 1.6;
-}
+.info-block { background: var(--surf2); border-radius: var(--r-sm); padding: 12px 14px; font-size: 13px; color: var(--text); line-height: 1.6; }
 .tag-list { display: flex; flex-wrap: wrap; gap: 5px; }
 .tag { padding: 3px 10px; border-radius: 20px; font-size: 11px; background: var(--surf3); color: var(--text2); }
 .tag.subway { background: #1a2d50; color: #90bdf7; }
@@ -177,17 +153,6 @@ body {
 .unit-mini-card:hover { border-color: var(--accent); }
 .unit-mini-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
 .unit-mini-name { font-size: 14px; font-weight: 600; }
-.unit-mini-type {
-  font-size: 10px; padding: 2px 8px; border-radius: 20px;
-  background: var(--surf4); color: var(--text2);
-}
-.unit-mini-scores { display: flex; gap: 8px; }
-.score-chip {
-  padding: 3px 10px; border-radius: 20px; font-size: 12px; font-weight: 600;
-}
-.score-chip.me { background: #1a2d50; color: var(--accent); }
-.score-chip.friend { background: #2e2800; color: var(--gold); }
-.score-chip.avg { background: var(--surf3); color: var(--text2); }
 
 .action-btn {
   width: 100%; padding: 10px; border-radius: var(--r-sm);
@@ -198,10 +163,8 @@ body {
 .action-btn:hover { background: var(--surf3); color: var(--text); border-color: var(--accent); }
 .action-btn.primary { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
-/* ── CHART ── */
 .chart-wrap { background: var(--surf2); border-radius: var(--r-sm); padding: 14px; margin-bottom: 16px; }
 
-/* ── EMPTY SIDE ── */
 .empty-side {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   height: 100%; color: var(--text3); text-align: center; padding: 40px;
@@ -209,7 +172,6 @@ body {
 .empty-side .icon { font-size: 40px; margin-bottom: 12px; }
 .empty-side p { font-size: 13px; line-height: 1.7; }
 
-/* ── MODAL (단지 상세) ── */
 .modal-bg {
   display: none; position: fixed; inset: 0; background: #00000088;
   z-index: 100; align-items: center; justify-content: center;
@@ -228,7 +190,6 @@ body {
 .info-key { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
 .info-val { font-size: 14px; font-weight: 500; }
 
-/* ── TOAST ── */
 .toast {
   position: fixed; top: 20px; right: 24px; z-index: 200;
   background: var(--green); color: #fff; font-size: 13px; font-weight: 500;
@@ -237,26 +198,20 @@ body {
 }
 .toast.show { opacity: 1; }
 
-/* ── SVG 지역 hover ── */
-.dong-region {
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
+.dong-region { cursor: pointer; transition: opacity 0.2s; }
 .dong-region:hover { opacity: 0.75; }
 </style>
 </head>
 <body>
 
-<!-- TOP NAV -->
 <div class="topnav">
   <div class="topnav-logo">🏘 임장노트 <span style="color:var(--text2);font-size:13px;font-weight:400;margin-left:8px;">메인 대시보드</span></div>
   <div class="nav-links">
     <a class="nav-link here">대시보드</a>
-    <a class="nav-link" href="임장_입력폼.html">손품·발품 입력 →</a>
+    <a class="nav-link" href="form.html">손품·발품 입력 →</a>
   </div>
 </div>
 
-<!-- STATS BAR -->
 <div class="stats-bar">
   <div class="stat-item">
     <div>
@@ -285,13 +240,9 @@ body {
   </div>
 </div>
 
-<!-- MAIN LAYOUT -->
 <div class="main-layout">
-
-  <!-- MAP AREA -->
   <div class="map-area">
     <div class="map-container">
-      <!-- 서울 행정구 SVG 지도 -->
       <svg id="seoul-svg" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
         <defs>
           <filter id="glow">
@@ -299,64 +250,33 @@ body {
             <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
           </filter>
         </defs>
-        <!-- 서울 25개 구 — simplified polygons -->
-        <!-- 각 구를 클릭하면 해당 구 데이터를 사이드패널에 로드 -->
         <g id="map-gu-group" stroke="#2a3348" stroke-width="1.2" fill="#1c2235">
-
-          <!-- 은평구 -->
           <polygon class="gu-region" data-gu="은평구" points="180,80 240,70 260,110 250,150 210,160 175,140 160,110" />
-          <!-- 도봉구 -->
           <polygon class="gu-region" data-gu="도봉구" points="340,50 400,45 420,90 390,120 350,115 320,85" />
-          <!-- 노원구 -->
           <polygon class="gu-region" data-gu="노원구" points="400,45 470,40 490,85 460,120 420,115 390,120 400,80" />
-          <!-- 강북구 -->
           <polygon class="gu-region" data-gu="강북구" points="280,65 340,50 350,100 320,120 285,115 265,95" />
-          <!-- 종로구 -->
           <polygon class="gu-region" data-gu="종로구" points="240,150 290,130 320,155 305,190 265,195 235,180" />
-          <!-- 성북구 -->
           <polygon class="gu-region" data-gu="성북구" points="290,110 350,100 375,135 355,165 310,170 285,155 295,130" />
-          <!-- 서대문구 -->
           <polygon class="gu-region" data-gu="서대문구" points="175,155 230,145 250,175 235,205 195,210 165,185" />
-          <!-- 마포구 -->
           <polygon class="gu-region" data-gu="마포구" points="155,195 200,185 235,205 240,240 215,270 170,265 145,235" />
-          <!-- 중구 -->
           <polygon class="gu-region" data-gu="중구" points="265,185 305,185 325,210 305,230 270,225 250,205" />
-          <!-- 용산구 -->
           <polygon class="gu-region" data-gu="용산구" points="240,235 285,220 320,240 310,275 270,280 240,260" />
-          <!-- 동대문구 -->
           <polygon class="gu-region" data-gu="동대문구" points="355,145 400,135 420,165 400,195 360,195 345,170" />
-          <!-- 중랑구 -->
           <polygon class="gu-region" data-gu="중랑구" points="405,120 455,110 475,150 455,180 415,185 395,160" />
-          <!-- 성동구 -->
           <polygon class="gu-region" data-gu="성동구" points="320,195 365,185 400,205 395,240 355,250 315,240 310,215" />
-          <!-- 광진구 -->
           <polygon class="gu-region" data-gu="광진구" points="395,200 435,190 460,220 450,255 410,260 390,240" />
-          <!-- 강동구 -->
           <polygon class="gu-region" data-gu="강동구" points="455,215 510,205 535,250 520,295 475,300 450,265" />
-          <!-- 영등포구 -->
           <polygon class="gu-region" data-gu="영등포구" points="155,285 200,270 240,285 245,330 215,360 165,355 140,320" />
-          <!-- 동작구 -->
           <polygon class="gu-region" data-gu="동작구" points="235,285 275,280 305,295 300,340 265,355 225,345 215,315" />
-          <!-- 서초구 -->
           <polygon class="gu-region" data-gu="서초구" points="285,295 330,280 370,295 375,345 340,375 295,370 275,340" />
-          <!-- 강남구 -->
           <polygon class="gu-region" data-gu="강남구" points="365,265 415,255 455,270 455,325 420,360 375,360 360,320" />
-          <!-- 송파구 -->
           <polygon class="gu-region" data-gu="송파구" points="450,280 500,265 535,285 535,345 500,375 455,370 445,330" />
-          <!-- 강서구 -->
           <polygon class="gu-region" data-gu="강서구" points="85,255 145,240 165,270 165,320 135,360 85,350 65,305" />
-          <!-- 양천구 -->
           <polygon class="gu-region" data-gu="양천구" points="105,330 155,315 180,340 175,375 140,390 100,375" />
-          <!-- 구로구 -->
           <polygon class="gu-region" data-gu="구로구" points="115,390 165,370 200,385 200,430 165,450 115,440 100,415" />
-          <!-- 금천구 -->
           <polygon class="gu-region" data-gu="금천구" points="165,435 210,420 235,445 230,485 195,500 160,485" />
-          <!-- 관악구 -->
           <polygon class="gu-region" data-gu="관악구" points="215,360 265,348 295,365 295,415 260,440 215,430 200,400" />
-
         </g>
-
-        <!-- 구 이름 라벨 -->
         <g id="map-label-group" font-size="9" fill="#4a5470" text-anchor="middle" pointer-events="none">
           <text x="210" y="125">은평구</text>
           <text x="370" y="82">도봉구</text>
@@ -384,27 +304,20 @@ body {
           <text x="195" y="462">금천구</text>
           <text x="252" y="400">관악구</text>
         </g>
-
-        <!-- 한강 -->
-        <path d="M 130,275 Q 200,285 270,280 Q 330,278 390,265 Q 450,255 520,262 Q 560,266 590,275" 
+        <path d="M 130,275 Q 200,285 270,280 Q 330,278 390,265 Q 450,255 520,262 Q 560,266 590,275"
               fill="none" stroke="#1a3a5f" stroke-width="14" opacity="0.6"/>
         <text x="350" y="290" font-size="9" fill="#2a5080" text-anchor="middle">한강</text>
       </svg>
-
-      <!-- 지도 범례 -->
       <div class="map-overlay-label">
         <div class="legend-item"><div class="legend-dot" style="background:#1c2235;border:1px solid #2a3348"></div> 미탐색</div>
         <div class="legend-item"><div class="legend-dot" style="background:#2a4d1a"></div> 탐색 중</div>
         <div class="legend-item"><div class="legend-dot" style="background:#4a3d10"></div> 발품 대기</div>
         <div class="legend-item"><div class="legend-dot" style="background:#1a3a70"></div> 정복 완료</div>
       </div>
-
-      <!-- 동 단위 표시 (선택된 구 내부) -->
       <div id="dong-pins" style="position:absolute;inset:0;pointer-events:none;"></div>
     </div>
   </div>
 
-  <!-- SIDE PANEL -->
   <div class="side-panel">
     <div class="side-tabs">
       <div class="side-tab active" onclick="switchSideTab('overview')">개요</div>
@@ -415,30 +328,24 @@ body {
       <div class="empty-side">
         <div class="icon">🗺️</div>
         <p>서울 지도에서 구(區)를 클릭하면<br>해당 지역의 임장 기록을 볼 수 있어요.<br><br>
-        아직 기록이 없다면<br><a href="임장_입력폼.html" style="color:var(--accent);">손품 입력 →</a> 에서 시작하세요.</p>
+        아직 기록이 없다면<br><a href="form.html" style="color:var(--accent);">손품 입력 →</a> 에서 시작하세요.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MODAL: 단지 상세 -->
 <div class="modal-bg" id="modal-unit">
   <div class="modal">
     <div id="modal-unit-content"></div>
   </div>
 </div>
 
-<!-- TOAST -->
 <div class="toast" id="toast"></div>
 
-<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 <script>
-// ────────────────────────────────
-// FIREBASE 초기화
-// ────────────────────────────────
 const firebaseConfig = {
   apiKey: "AIzaSyDRnkAIYNXsKq77wE53y0qh2f92TT4zhxE",
   authDomain: "imjang-study.firebaseapp.com",
@@ -452,13 +359,9 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 const REF = db.ref('imjang');
 
-// ────────────────────────────────
-// DATA
-// ────────────────────────────────
 const KEY = 'imjang_data';
 let D = JSON.parse(localStorage.getItem(KEY) || '{}');
 
-// defaults
 if (!D.step1) D.step1 = {};
 if (!D.step2) D.step2 = { units: [] };
 if (!D.step3) D.step3 = { slots: [{},{},{},{}] };
@@ -468,12 +371,10 @@ if (!D.step6) D.step6 = { units: [], food: {} };
 if (!D.doneDongs) D.doneDongs = [];
 if (!D.archivedDongs) D.archivedDongs = [];
 
-// 현재 선택된 구
 let selectedGu = null;
 let currentSideTab = 'overview';
 let priceChart = null;
 
-// Firebase 실시간 수신 — 입력폼에서 저장하면 대시보드도 자동 갱신
 REF.on('value', (snapshot) => {
   const remote = snapshot.val();
   if (!remote) return;
@@ -481,14 +382,10 @@ REF.on('value', (snapshot) => {
   localStorage.setItem(KEY, JSON.stringify(D));
   updateStats();
   colorMap();
-  // 현재 선택된 구 있으면 사이드패널도 갱신
   if (selectedGu) loadSidePanel(selectedGu);
   showToast('🔄 데이터 업데이트됨');
 });
 
-// ────────────────────────────────
-// STATS
-// ────────────────────────────────
 function updateStats() {
   const conquered = D.doneDongs?.length || 0;
   const pending = D.step5?.dday && !D.step5.done ? 1 : 0;
@@ -496,16 +393,12 @@ function updateStats() {
   document.getElementById('stat-conquered').textContent = conquered;
   document.getElementById('stat-pending').textContent = pending + (D.step3?.slots?.filter(s=>s.name).length ? 1 : 0);
   document.getElementById('stat-units').textContent = units;
-  const pct = ((conquered / 424) * 100).toFixed(1); // 서울 424개 행정동
-  document.getElementById('conquest-fill').style.width = Math.min(pct * 20, 100) + '%'; // scale for visibility
+  const pct = ((conquered / 424) * 100).toFixed(1);
+  document.getElementById('conquest-fill').style.width = Math.min(pct * 20, 100) + '%';
   document.getElementById('conquest-pct').textContent = pct + '%';
 }
 
-// ────────────────────────────────
-// MAP: GU CLICK
-// ────────────────────────────────
 function getGuStatus(guName) {
-  // 현재 임장 중인 구 판단
   const currentGu = D.step1?.gu;
   if (!currentGu) return 'untouched';
   if (D.step5?.done && currentGu === guName) return 'conquered';
@@ -526,9 +419,7 @@ function colorMap() {
     const gu = el.dataset.gu;
     const status = getGuStatus(gu);
     el.style.fill = statusColors[status];
-    if (status === 'conquered') {
-      el.style.filter = 'url(#glow)';
-    }
+    if (status === 'conquered') el.style.filter = 'url(#glow)';
   });
 }
 
@@ -542,9 +433,6 @@ document.querySelectorAll('.gu-region').forEach(el => {
   });
 });
 
-// ────────────────────────────────
-// SIDE PANEL
-// ────────────────────────────────
 function switchSideTab(tab) {
   currentSideTab = tab;
   document.querySelectorAll('.side-tab').forEach((t,i) => {
@@ -560,10 +448,7 @@ function loadSidePanel(gu) {
 
   if (currentSideTab === 'overview') {
     content.innerHTML = renderOverview(gu, status, isCurrentGu);
-    // chart
-    if (isCurrentGu && D.step2?.units?.length) {
-      setTimeout(() => renderPriceChart(), 50);
-    }
+    if (isCurrentGu && D.step2?.units?.length) setTimeout(() => renderPriceChart(), 50);
   } else if (currentSideTab === 'units') {
     content.innerHTML = renderUnits(gu, isCurrentGu);
   } else if (currentSideTab === 'insights') {
@@ -578,13 +463,11 @@ function renderOverview(gu, status, isCurrent) {
   if (!isCurrent) {
     return `<div class="dong-header">
       <div class="dong-title">${gu}</div>
-      <div class="dong-badges">
-        <span class="badge">미탐색 구역</span>
-      </div>
+      <div class="dong-badges"><span class="badge">미탐색 구역</span></div>
     </div>
     <div style="color:var(--text3);font-size:13px;line-height:1.7;">
       아직 이 구에 대한 임장 기록이 없어요.<br>
-      <a href="임장_입력폼.html" style="color:var(--accent);">손품 입력 →</a> 에서 ${gu} 데이터를 시작하세요.
+      <a href="form.html" style="color:var(--accent);">손품 입력 →</a> 에서 ${gu} 데이터를 시작하세요.
     </div>`;
   }
 
@@ -606,12 +489,10 @@ function renderOverview(gu, status, isCurrent) {
         ${dday !== null ? `<span class="badge gold">${dday > 0 ? 'D-'+dday : dday === 0 ? 'D-Day 🔥' : '임장 완료'}</span>` : ''}
       </div>
     </div>
-
     ${s1.reason ? `<div class="info-section">
       <div class="info-section-title">📌 선정 배경 & 호재</div>
       <div class="info-block">${s1.reason}</div>
     </div>` : ''}
-
     ${subways.length ? `<div class="info-section">
       <div class="info-section-title">🚇 교통 인프라</div>
       <div class="tag-list">
@@ -620,7 +501,6 @@ function renderOverview(gu, status, isCurrent) {
         ${(s1.landmark||[]).map(l => `<span class="tag">${l}</span>`).join('')}
       </div>
     </div>` : ''}
-
     ${s2.avgPrice ? `<div class="info-section">
       <div class="info-section-title">💰 동네 시세 요약</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
@@ -634,12 +514,10 @@ function renderOverview(gu, status, isCurrent) {
         </div>
       </div>
     </div>` : ''}
-
     ${s2.units?.length ? `<div class="info-section">
       <div class="info-section-title">📊 단지 시세 차트</div>
       <div class="chart-wrap"><canvas id="price-chart" height="160"></canvas></div>
     </div>` : ''}
-
     ${s5.dday ? `<div class="info-section">
       <div class="info-section-title">🏃‍♀️ 발품 정보</div>
       <div class="info-block">
@@ -649,7 +527,6 @@ function renderOverview(gu, status, isCurrent) {
       </div>
       ${s5.naverLink ? `<a href="${s5.naverLink}" target="_blank" class="action-btn">🏃‍♂️ 네이버 지도로 동선 열기</a>` : ''}
     </div>` : ''}
-
     ${D.step6?.food?.name ? `<div class="info-section">
       <div class="info-section-title">🍽️ 이번 임장 맛집</div>
       <div class="info-block">
@@ -658,8 +535,7 @@ function renderOverview(gu, status, isCurrent) {
         ${D.step6.food.memo ? `<div style="font-size:12px;color:var(--text3);margin-top:4px;">${D.step6.food.memo}</div>` : ''}
       </div>
     </div>` : ''}
-
-    <a href="임장_입력폼.html" class="action-btn primary">✏️ 입력 폼에서 수정하기</a>
+    <a href="form.html" class="action-btn primary">✏️ 입력 폼에서 수정하기</a>
   `;
 }
 
@@ -679,13 +555,14 @@ function renderUnits(gu, isCurrent) {
         ? ((parseInt(fu.traffic||0) + parseInt(fu.school||0) + parseInt(fu.commerce||0) + parseInt(fu.env||0)) / 4).toFixed(1)
         : null;
       const gap = (s.sale && s.lease) ? (parseFloat(s.sale) - parseFloat(s.lease)).toFixed(1) : null;
+      const ppu = (s.pyeong && s.sale) ? Math.round(parseFloat(s.sale) * 10000 / parseFloat(s.pyeong)) : s.ppu || null;
       return `<div class="unit-mini-card" onclick="openUnitModal(${i})">
         <div class="unit-mini-top">
           <div class="unit-mini-name">${SLOT_ICONS[i]} ${s.name}</div>
           ${avgScore ? `<div style="font-size:12px;color:var(--gold);">★ ${avgScore}</div>` : ''}
         </div>
         <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">
-          ${s.ppu ? `평당 ${Number(s.ppu).toLocaleString()}만` : ''}
+          ${ppu ? `평당 ${Number(ppu).toLocaleString()}만` : ''}
           ${s.sale ? ` · 매매 ${s.sale}억` : ''}
           ${gap ? ` · 갭 ${gap}억` : ''}
         </div>
@@ -725,9 +602,6 @@ function renderInsights(gu, isCurrent) {
   return html || `<div style="color:var(--text3);font-size:13px;padding:20px 0;">4단계 후기 수집 및 발품 기록이 완료되면 인사이트가 쌓입니다.</div>`;
 }
 
-// ────────────────────────────────
-// CHART
-// ────────────────────────────────
 function renderPriceChart() {
   const units = (D.step2?.units || []).filter(u => u.name && u.sale);
   if (!units.length) return;
@@ -740,27 +614,13 @@ function renderPriceChart() {
     data: {
       labels: sorted.map(u => u.name.length > 6 ? u.name.slice(0,6)+'…' : u.name),
       datasets: [
-        {
-          label: '매매호가(억)',
-          data: sorted.map(u => parseFloat(u.sale||0)),
-          backgroundColor: '#3d7fff55',
-          borderColor: '#3d7fff',
-          borderWidth: 1,
-        },
-        {
-          label: '전세호가(억)',
-          data: sorted.map(u => parseFloat(u.lease||0)),
-          backgroundColor: '#f5b73133',
-          borderColor: '#f5b731',
-          borderWidth: 1,
-        },
+        { label: '매매호가(억)', data: sorted.map(u => parseFloat(u.sale||0)), backgroundColor: '#3d7fff55', borderColor: '#3d7fff', borderWidth: 1 },
+        { label: '전세호가(억)', data: sorted.map(u => parseFloat(u.lease||0)), backgroundColor: '#f5b73133', borderColor: '#f5b731', borderWidth: 1 },
       ]
     },
     options: {
       responsive: true,
-      plugins: {
-        legend: { labels: { color: '#8892aa', font: { size: 11 } } },
-      },
+      plugins: { legend: { labels: { color: '#8892aa', font: { size: 11 } } } },
       scales: {
         x: { ticks: { color: '#8892aa', font: { size: 10 } }, grid: { color: '#2a3348' } },
         y: { ticks: { color: '#8892aa', font: { size: 10 } }, grid: { color: '#2a3348' } },
@@ -769,9 +629,6 @@ function renderPriceChart() {
   });
 }
 
-// ────────────────────────────────
-// UNIT MODAL
-// ────────────────────────────────
 const SLOT_ICONS = ['👑','🏢','🏢','💰'];
 const SLOT_LABELS = ['지역 대장','우량 단지①','우량 단지②','가성비 단지'];
 
@@ -780,6 +637,10 @@ function openUnitModal(idx) {
   const rv = D.step4?.reviews?.[idx] || {};
   const fu = D.step6?.units?.[idx] || {};
   if (!s.name) return;
+
+  const ppu = (s.pyeong && s.sale)
+    ? Math.round(parseFloat(s.sale) * 10000 / parseFloat(s.pyeong)).toLocaleString('ko-KR') + '만'
+    : (s.ppu ? Number(s.ppu).toLocaleString() + '만' : '—');
 
   const scores = ['교통','학군','상권','환경'].map((lbl,i) => {
     const keys = ['traffic','school','commerce','env'];
@@ -801,7 +662,7 @@ function openUnitModal(idx) {
     <div class="info-section">
       <div class="info-section-title">매물 정보</div>
       <div class="info-grid">
-        <div class="info-cell"><div class="info-key">평당가</div><div class="info-val">${s.ppu ? Number(s.ppu).toLocaleString()+'만' : '—'}</div></div>
+        <div class="info-cell"><div class="info-key">평당가</div><div class="info-val">${ppu}</div></div>
         <div class="info-cell"><div class="info-key">매매호가</div><div class="info-val">${s.sale ? s.sale+'억' : '—'}</div></div>
         <div class="info-cell"><div class="info-key">전세호가</div><div class="info-val">${s.lease ? s.lease+'억' : '—'}</div></div>
         <div class="info-cell"><div class="info-key">투자 갭</div><div class="info-val" style="color:var(--gold)">${(s.sale&&s.lease) ? (parseFloat(s.sale)-parseFloat(s.lease)).toFixed(1)+'억' : '—'}</div></div>
@@ -827,9 +688,6 @@ function openUnitModal(idx) {
 function closeModal() { document.getElementById('modal-unit').classList.remove('open'); }
 document.getElementById('modal-unit').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
 
-// ────────────────────────────────
-// UTILS
-// ────────────────────────────────
 function calcDday(dateStr) {
   const today = new Date(); today.setHours(0,0,0,0);
   const target = new Date(dateStr); target.setHours(0,0,0,0);
@@ -841,13 +699,9 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ────────────────────────────────
-// INIT
-// ────────────────────────────────
 updateStats();
 colorMap();
 
-// 현재 임장 중인 구가 있으면 자동 선택
 if (D.step1?.gu) {
   selectedGu = D.step1.gu;
   const guEl = document.querySelector(`[data-gu="${D.step1.gu}"]`);
@@ -858,7 +712,6 @@ if (D.step1?.gu) {
   }
 }
 
-// 정복 완료 시 토스트
 if (D.step5?.done && !sessionStorage.getItem('toastShown')) {
   setTimeout(() => {
     showToast(`🎉 ${D.step1?.dong || ''} 정복 완료! 서울 정복률 ${((D.doneDongs?.length||1) / 424 * 100).toFixed(1)}% 달성!`);
