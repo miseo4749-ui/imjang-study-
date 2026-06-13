@@ -1291,10 +1291,10 @@ function makeDefaultD() {
   return {
     step1: {gu:'',dong:'',id:'',reasonType:'',familiarity:'',reason:'',subway:[],park:[],landmark:[]},
     step2: {avgPrice:'',leaseRate:'',units:[]},
-    step3: {slots:[{},{},{},{}]},
-    step4: {reviews:[{},{},{},{}]},
+    step3: {slots:[{_slot:true},{_slot:true},{_slot:true},{_slot:true}]},
+    step4: {reviews:[{_slot:true},{_slot:true},{_slot:true},{_slot:true}]},
     step5: {dday:'',start:'',naverLink:'',route:'',memo:'',done:false},
-    step6: {units:[{},{},{},{}],food:{}},
+    step6: {units:[{_slot:true},{_slot:true},{_slot:true},{_slot:true}],food:{}},
     doneDongs: [],
     archivedDongs: []
   };
@@ -1304,15 +1304,15 @@ function applyDefaults() {
   if (!D.step2) D.step2 = {avgPrice:'',leaseRate:'',units:[]};
   if (!D.step3) D.step3 = {slots:[{},{},{},{}]};
   // Firebase는 빈 객체 {}를 null로 저장하므로 slots 배열 보정
-  if (!D.step3.slots || !Array.isArray(D.step3.slots)) D.step3.slots = [{},{},{},{}];
-  else D.step3.slots = D.step3.slots.map(s => s || {});
-  if (!D.step4) D.step4 = {reviews:[{},{},{},{}]};
-  if (!D.step4.reviews || !Array.isArray(D.step4.reviews)) D.step4.reviews = [{},{},{},{}];
-  else D.step4.reviews = D.step4.reviews.map(r => r || {});
+  if (!D.step3.slots || !Array.isArray(D.step3.slots)) D.step3.slots = [{_slot:true},{_slot:true},{_slot:true},{_slot:true}];
+  else D.step3.slots = D.step3.slots.map(s => s || {_slot:true});
+  if (!D.step4) D.step4 = {reviews:[{_slot:true},{_slot:true},{_slot:true},{_slot:true}]};
+  if (!D.step4.reviews || !Array.isArray(D.step4.reviews)) D.step4.reviews = [{_slot:true},{_slot:true},{_slot:true},{_slot:true}];
+  else D.step4.reviews = D.step4.reviews.map(r => r || {_slot:true});
   if (!D.step5) D.step5 = {dday:'',start:'',naverLink:'',route:'',memo:'',done:false};
   if (!D.step6) D.step6 = {units:[{},{},{},{}],food:{}};
-  if (!D.step6.units || !Array.isArray(D.step6.units)) D.step6.units = [{},{},{},{}];
-  else D.step6.units = D.step6.units.map(u => u || {});
+  if (!D.step6.units || !Array.isArray(D.step6.units)) D.step6.units = [{_slot:true},{_slot:true},{_slot:true},{_slot:true}];
+  else D.step6.units = D.step6.units.map(u => u || {_slot:true});
   if (!D.doneDongs) D.doneDongs = [];
   if (!D.archivedDongs) D.archivedDongs = [];
 }
@@ -1684,13 +1684,13 @@ function renderSlots() {
 
 function addSlot() {
   if (D.step3.slots.length >= 8) { showToast('⚠️ 단지는 최대 8개까지 추가할 수 있어요'); return; }
-  D.step3.slots.push({});
-  // step4 reviews, step6 units 배열도 함께 확장
+  // Firebase는 {} 빈 객체를 저장하지 않으므로 _slot 키로 고정
+  D.step3.slots.push({ _slot: true });
   if (!D.step4.reviews) D.step4.reviews = [];
-  D.step4.reviews.push({});
+  D.step4.reviews.push({ _slot: true });
   if (!D.step6) D.step6 = { units: [], food: {} };
   if (!D.step6.units) D.step6.units = [];
-  D.step6.units.push({});
+  D.step6.units.push({ _slot: true });
   save();
   renderSlots();
   showToast('✅ 단지 슬롯 추가됨');
