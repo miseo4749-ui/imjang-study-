@@ -1622,35 +1622,47 @@ function calcAndFillAvg() {
 // ────────────────────────────────
 // STEP 3: SLOTS
 // ────────────────────────────────
-const SLOT_TYPES = [
-  { key:'crown', icon:'👑', label:'지역 대장 (왕관)', hint:'호갱노노 왕관 단지, 가격 상한선 파악용' },
-  { key:'major1', icon:'🏢', label:'우량 대단지 ①', hint:'500세대↑, 인기 우량주' },
-  { key:'major2', icon:'🏢', label:'우량 대단지 ②', hint:'500세대↑, 비교군' },
-  { key:'value', icon:'💰', label:'가성비 단지', hint:'평당가 낮지만 세대수 많음, 갭투자 후보' },
+const SLOT_TYPE_OPTIONS = [
+  { key:'crown',  icon:'👑', label:'지역 대장',    hint:'호갱노노 왕관 단지, 가격 상한선 파악용' },
+  { key:'major',  icon:'🏢', label:'우량 대단지',  hint:'500세대↑, 인기 우량주' },
+  { key:'value',  icon:'💰', label:'가성비 단지',  hint:'평당가 낮지만 세대수 많음, 갭투자 후보' },
+  { key:'extra',  icon:'🏠', label:'추가 단지',    hint:'추가로 분석할 단지' },
 ];
+// 기본 슬롯 타입 (인덱스별)
+const DEFAULT_SLOT_TYPES = ['crown','major','major','value'];
+
+function getSlotMeta(slot, i) {
+  const key = slot.typeKey || DEFAULT_SLOT_TYPES[i] || 'extra';
+  return SLOT_TYPE_OPTIONS.find(t => t.key === key) || SLOT_TYPE_OPTIONS[3];
+}
+
 let pickingSlotIdx = -1;
 
 function renderSlots() {
   const grid = document.getElementById('slot-grid');
   const slots = D.step3.slots;
 
-  // 슬롯 카드 렌더 (기본 4개 + 추가 단지)
   const cardsHtml = slots.map((slot, i) => {
-    const preset = SLOT_TYPES[i];
-    const icon  = preset ? preset.icon  : '🏠';
-    const label = preset ? preset.label : `추가 단지 ${i - 3}`;
-    const hint  = preset ? preset.hint  : '추가로 분석할 단지';
+    const meta  = getSlotMeta(slot, i);
     const filled = !!slot.name;
-    const isExtra = i >= SLOT_TYPES.length; // 기본 4개 외 추가된 슬롯
+    const canDelete = i >= 4;
+
+    const typeSelector = `
+      <select class="fi" style="font-size:11px;padding:3px 6px;height:auto;width:auto;flex-shrink:0;"
+        onchange="updateSlot(${i},'typeKey',this.value);renderSlots()">
+        ${SLOT_TYPE_OPTIONS.map(t =>
+          `<option value="${t.key}" ${(slot.typeKey||DEFAULT_SLOT_TYPES[i]||'extra')===t.key?'selected':''}>${t.icon} ${t.label}</option>`
+        ).join('')}
+      </select>`;
 
     return `<div class="slot-card" id="slot-card-${i}">
-      <div class="slot-card-head">
-        <div class="slot-num ${filled ? 'filled' : ''}">${icon}</div>
-        <div style="flex:1;">
-          <div class="slot-title">${label}</div>
-          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${hint}</div>
+      <div class="slot-card-head" style="align-items:flex-start;">
+        <div class="slot-num ${filled ? 'filled' : ''}" style="margin-top:2px;">${meta.icon}</div>
+        <div style="flex:1;min-width:0;">
+          ${typeSelector}
+          <div style="font-size:11px;color:var(--text3);margin-top:4px;">${meta.hint}</div>
         </div>
-        ${isExtra ? `<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;" title="슬롯 삭제" onclick="removeSlot(${i})">×</button>` : ''}
+        ${canDelete ? `<button style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:18px;padding:0 4px;margin-top:2px;" title="슬롯 삭제" onclick="removeSlot(${i})">×</button>` : ''}
       </div>
       ${filled ? `
         <div class="slot-filled-name">📌 ${slot.name}</div>
@@ -1749,7 +1761,7 @@ function renderReviewTabs() {
     return;
   }
   tabs.innerHTML = slots.map((s,i) => s.name ?
-    `<button class="unit-tab ${i===0?'active':''}" onclick="switchReviewTab(${i})">${s.name}</button>` : ''
+    `<button class="unit-tab ${i===0?'active':''}" data-slot-idx="${i}" onclick="switchReviewTab(${i})">${s.name}</button>` : ''
   ).join('');
   contents.innerHTML = slots.map((s,i) => s.name ? `
     <div class="unit-tab-content ${i===0?'active':''}" id="review-content-${i}">
@@ -1783,7 +1795,7 @@ function renderReviewTabs() {
 function switchReviewTab(idx) {
   document.querySelectorAll('.unit-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.unit-tab-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('.unit-tab')[idx]?.classList.add('active');
+  document.querySelector(`.unit-tab[data-slot-idx="${idx}"]`)?.classList.add('active');
   document.getElementById(`review-content-${idx}`)?.classList.add('active');
 }
 
@@ -1828,7 +1840,7 @@ function renderFieldTabs() {
     if (!s.name) return '';
     const fu = D.step6.units[i] || {};
     const authorTag = fu.author ? ` <span style="font-size:10px;color:var(--green);"> · ${fu.author}</span>` : '';
-    return `<button class="unit-tab ${i===currentUnitIdx?'active':''}" onclick="switchFieldTab(${i})">${s.name}${authorTag}</button>`;
+    return `<button class="unit-tab ${i===currentUnitIdx?'active':''}" data-slot-idx="${i}" onclick="switchFieldTab(${i})">${s.name}${authorTag}</button>`;
   }).join('');
 
   contents.innerHTML = slots.map((s,i) => {
@@ -1876,7 +1888,8 @@ function renderFieldTabs() {
 function switchFieldTab(idx) {
   document.querySelectorAll('#field-unit-tabs .unit-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('#field-tab-contents .unit-tab-content').forEach(c => c.classList.remove('active'));
-  document.querySelectorAll('#field-unit-tabs .unit-tab')[idx]?.classList.add('active');
+  // DOM 위치가 아닌 data-slot-idx 속성으로 정확히 버튼을 찾음
+  document.querySelector(`#field-unit-tabs .unit-tab[data-slot-idx="${idx}"]`)?.classList.add('active');
   document.getElementById(`field-content-${idx}`)?.classList.add('active');
   // 단지 전환 → 아코디언 초기화 후 해당 단지 체크리스트 + 현장메모 재렌더
   currentUnitIdx = idx;
