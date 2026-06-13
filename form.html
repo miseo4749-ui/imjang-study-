@@ -641,8 +641,7 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
     <a href="dashboard.html" class="topnav-links" style="padding:6px 14px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;">대시보드 →</a>
   </div>
 </div>
-<!-- 패널 닫기 오버레이 -->
-<div id="record-panel-overlay" onclick="closeRecordPanel()" style="display:none;position:fixed;inset:0;z-index:190;"></div>
+<!-- 패널 닫기: document 클릭으로 처리 (오버레이 제거) -->
 
 <!-- STEP TABS -->
 <div class="step-wrap">
@@ -1223,16 +1222,24 @@ function openRecord(id) {
 // ── 기록 목록 패널 ──
 function toggleRecordPanel() {
   const panel = document.getElementById('record-panel');
-  const overlay = document.getElementById('record-panel-overlay');
   const isOpen = panel.style.display !== 'none';
   if (isOpen) { closeRecordPanel(); return; }
   panel.style.display = 'block';
-  overlay.style.display = 'block';
   loadRecordList();
+  // 다음 tick에 document 리스너 등록 (현재 클릭 이벤트와 충돌 방지)
+  setTimeout(() => {
+    document.addEventListener('click', _outsideClickHandler);
+  }, 0);
 }
 function closeRecordPanel() {
   document.getElementById('record-panel').style.display = 'none';
-  document.getElementById('record-panel-overlay').style.display = 'none';
+  document.removeEventListener('click', _outsideClickHandler);
+}
+function _outsideClickHandler(e) {
+  const wrap = document.getElementById('record-badge-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    closeRecordPanel();
+  }
 }
 function loadRecordList() {
   const listEl = document.getElementById('record-list');
