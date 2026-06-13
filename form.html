@@ -387,6 +387,128 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
   .addr-row { grid-template-columns: 1fr; }
   .step-wrap { padding: 0 16px; }
 }
+
+/* ════════════════════════════════
+   발품 섹션 탭
+════════════════════════════════ */
+.field-section { display: none; }
+.field-section.active { display: block; }
+.field-stab-wrap {
+  display: flex; gap: 0; overflow-x: auto;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px; background: var(--surf);
+  border-radius: var(--r) var(--r) 0 0;
+}
+.field-stab {
+  padding: 11px 14px; font-size: 12px; font-weight: 500;
+  color: var(--text3); cursor: pointer; border: none; background: none;
+  font-family: inherit; border-bottom: 2px solid transparent;
+  white-space: nowrap; transition: all 0.15s;
+}
+.field-stab:hover { color: var(--text2); }
+.field-stab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* ════════════════════════════════
+   아코디언
+════════════════════════════════ */
+.cl-accordion {
+  background: var(--surf); border: 1px solid var(--border);
+  border-radius: var(--r); margin-bottom: 8px; overflow: hidden;
+}
+.cl-acc-header {
+  padding: 13px 16px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  user-select: none; transition: background 0.15s;
+}
+.cl-acc-header:hover { background: var(--surf2); }
+.cl-acc-label { font-size: 13px; font-weight: 600; flex: 1; }
+.cl-acc-progress {
+  font-size: 11px; color: var(--text3);
+  background: var(--surf2); padding: 3px 9px;
+  border-radius: 20px; white-space: nowrap;
+}
+.cl-acc-progress.partial { color: var(--gold); background: var(--gold-dim); }
+.cl-acc-progress.done { color: var(--green); background: #2ecc8f15; }
+.cl-acc-arrow { font-size: 10px; color: var(--text3); transition: transform 0.2s; }
+.cl-acc-arrow.open { transform: rotate(180deg); }
+.cl-acc-bar { height: 3px; background: var(--surf3); }
+.cl-acc-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--green));
+  transition: width 0.3s;
+}
+.cl-acc-body { display: none; padding: 4px 16px 12px; }
+.cl-acc-body.open { display: block; }
+
+/* ════════════════════════════════
+   체크리스트 아이템
+════════════════════════════════ */
+.cl-item {
+  padding: 9px 0; border-bottom: 1px solid var(--border);
+}
+.cl-item:last-child { border-bottom: none; }
+.cl-item-row { display: flex; align-items: flex-start; gap: 9px; }
+.cl-cb {
+  width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px;
+  cursor: pointer; accent-color: var(--accent);
+}
+.cl-item-label { font-size: 13px; flex: 1; line-height: 1.5; cursor: pointer; }
+.cl-item-label.important { color: var(--gold); font-weight: 600; }
+.cl-item-label.important::before { content: '⭐ '; font-size: 11px; }
+.cl-flag-btn {
+  font-size: 10px; padding: 2px 7px; border-radius: 20px;
+  border: 1px solid var(--border); background: none;
+  color: var(--text3); cursor: pointer; font-family: inherit;
+  white-space: nowrap; transition: all 0.15s; flex-shrink: 0;
+}
+.cl-flag-btn.flagged { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+.cl-memo-wrap { margin-top: 5px; margin-left: 25px; }
+.cl-memo-input {
+  width: 100%; padding: 6px 10px;
+  background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--text);
+  font-family: inherit; font-size: 12px; outline: none;
+  transition: border-color 0.15s;
+}
+.cl-memo-input:focus { border-color: var(--accent); }
+.cl-memo-input::placeholder { color: var(--text3); }
+
+/* ════════════════════════════════
+   Q&A 아이템
+════════════════════════════════ */
+.qa-item {
+  background: var(--surf2); border: 1px solid var(--border);
+  border-radius: var(--r-sm); padding: 11px 13px; margin-bottom: 7px;
+}
+.qa-item-top { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 7px; }
+.qa-cb { width: 16px; height: 16px; flex-shrink: 0; margin-top: 3px; accent-color: var(--accent); cursor: pointer; }
+.qa-question { font-size: 13px; flex: 1; line-height: 1.5; }
+.qa-flag-btn {
+  font-size: 10px; padding: 2px 7px; border-radius: 20px;
+  border: 1px solid var(--border); background: none;
+  color: var(--text3); cursor: pointer; font-family: inherit;
+  white-space: nowrap; flex-shrink: 0; transition: all 0.15s;
+}
+.qa-flag-btn.flagged { background: var(--gold-dim); border-color: var(--gold); color: var(--gold); }
+.qa-answer-input {
+  width: 100%; padding: 7px 10px;
+  background: var(--surf3); border: 1px solid transparent;
+  border-radius: var(--r-sm); color: var(--text);
+  font-family: inherit; font-size: 12px; outline: none;
+  transition: border-color 0.15s;
+}
+.qa-answer-input:focus { border-color: var(--accent); }
+.qa-answer-input::placeholder { color: var(--text3); }
+
+/* ════════════════════════════════
+   최종 판단 자동요약
+════════════════════════════════ */
+.summary-flags { display: flex; flex-direction: column; gap: 5px; margin-top: 8px; }
+.summary-flag-item {
+  display: flex; align-items: flex-start; gap: 7px;
+  font-size: 12px; color: var(--text2); line-height: 1.5;
+}
+.summary-flag-dot { flex-shrink: 0; }
 </style>
 </head>
 <body>
@@ -720,39 +842,70 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
       <div class="guide-icon">🏃‍♀️</div>
       <div>
         <div class="guide-title" id="field-guide-title">현장 발품 기록 모드</div>
-        <div class="guide-body">선정한 4개 단지를 동선 순서대로 확인하며 툭툭 터치해 주세요!</div>
+        <div class="guide-body">탭을 눌러 단지 체크 → 재개발/비재개발 체크리스트 → 부동산 질문 → 현장 메모 → 최종 판단 순으로 기록하세요.</div>
       </div>
     </div>
 
-    <!-- 단지 탭 -->
-    <div class="unit-tabs" id="field-unit-tabs"></div>
-    <div id="field-tab-contents"></div>
+    <!-- 섹션 탭 바 -->
+    <div class="field-stab-wrap">
+      <button class="field-stab active" data-sec="units"       onclick="switchFieldSection('units')">🏢 단지 체크</button>
+      <button class="field-stab"        data-sec="redevelop"   onclick="switchFieldSection('redevelop')">🏗️ 재개발</button>
+      <button class="field-stab"        data-sec="nonredevelop" onclick="switchFieldSection('nonredevelop')">🏠 비재개발</button>
+      <button class="field-stab"        data-sec="questions"   onclick="switchFieldSection('questions')">❓ 부동산 질문</button>
+      <button class="field-stab"        data-sec="memo"        onclick="switchFieldSection('memo')">📝 현장 메모</button>
+      <button class="field-stab"        data-sec="verdict"     onclick="switchFieldSection('verdict')">⚖️ 최종 판단</button>
+    </div>
 
-    <!-- 맛집 등록 -->
-    <div class="form-section" style="border-color:#2a4030;">
-      <div class="form-section-title">🍽️ 오늘의 임장 맛집·카페</div>
-      <div class="frow col2">
-        <div class="fg">
-          <label>상호명</label>
-          <input class="fi" id="f-food-name" placeholder="예: 연남동 000카페">
+    <!-- ① 단지 체크 (기존 기능 유지) -->
+    <div id="field-section-units" class="field-section active">
+      <div class="unit-tabs" id="field-unit-tabs" style="margin-top:4px;"></div>
+      <div id="field-tab-contents"></div>
+      <div class="form-section" style="border-color:#2a4030;margin-top:16px;">
+        <div class="form-section-title">🍽️ 오늘의 임장 맛집·카페</div>
+        <div class="frow col2">
+          <div class="fg"><label>상호명</label>
+            <input class="fi" id="f-food-name" placeholder="예: 연남동 000카페"></div>
+          <div class="fg"><label>추천 메뉴</label>
+            <input class="fi" id="f-food-menu" placeholder="예: 아인슈페너"></div>
         </div>
-        <div class="fg">
-          <label>추천 메뉴</label>
-          <input class="fi" id="f-food-menu" placeholder="예: 아인슈페너">
+        <div class="frow"><div class="fg"><label>메모</label>
+          <input class="fi" id="f-food-memo" placeholder="예: 2층이 뷰 좋음, 웨이팅 30분"></div>
         </div>
       </div>
-      <div class="frow">
-        <div class="fg">
-          <label>메모</label>
-          <input class="fi" id="f-food-memo" placeholder="예: 2층이 뷰 좋음, 웨이팅 30분">
-        </div>
+      <div style="margin:16px 0 40px;">
+        <button class="btn-save gold" style="width:100%;padding:16px;font-size:15px;" onclick="completeField()">
+          🔴 임장 완료 — 정복!
+        </button>
       </div>
     </div>
 
-    <div style="margin-bottom:40px;">
-      <button class="btn-save gold" style="width:100%;padding:16px;font-size:15px;" onclick="completeField()">
-        🔴 임장 완료 — 합정동 정복!
-      </button>
+    <!-- ② 재개발 체크리스트 -->
+    <div id="field-section-redevelop" class="field-section">
+      <div id="redevelop-checklist-content" style="padding-top:4px;"></div>
+    </div>
+
+    <!-- ③ 비재개발 체크리스트 -->
+    <div id="field-section-nonredevelop" class="field-section">
+      <div id="nonredevelop-checklist-content" style="padding-top:4px;"></div>
+    </div>
+
+    <!-- ④ 부동산 질문 -->
+    <div id="field-section-questions" class="field-section">
+      <div style="display:flex;gap:8px;padding:12px 0;">
+        <button class="radio-btn sel" id="q-btn-rd"  onclick="setQAreaType('rd')">🏗️ 재개발 지역 질문</button>
+        <button class="radio-btn"    id="q-btn-nrd" onclick="setQAreaType('nrd')">🏠 비재개발 지역 질문</button>
+      </div>
+      <div id="questions-content"></div>
+    </div>
+
+    <!-- ⑤ 현장 메모 -->
+    <div id="field-section-memo" class="field-section">
+      <div id="field-memo-content"></div>
+    </div>
+
+    <!-- ⑥ 최종 판단 -->
+    <div id="field-section-verdict" class="field-section">
+      <div id="verdict-content"></div>
     </div>
   </div>
 
@@ -1507,6 +1660,668 @@ loadStepData(1);
   if (n===5 && d.dday) markTabDone(5);
   if (D.step5?.done) markTabDone(6);
 });
+</script>
+
+<!-- ════════════════════════════════════════
+     발품 체크리스트 확장 기능
+════════════════════════════════════════ -->
+<script>
+// ── 체크리스트 데이터 정의 ──
+// 형식: [key, 라벨, 중요여부]
+const RD_CL = {
+  district:    { label:'🏘️ 구역 확인', items:[
+    ['address','정확한 주소',false],['districtName','구역명',false],
+    ['method','사업 방식 (모아타운/가로주택/신통기획/일반재개발)',false],
+    ['included','구역 포함 여부',true],['boundary','구역 경계선 위치',true],
+    ['stage','현재 추진 단계',false],['baseDate','권리산정 기준일',true],
+    ['entryRight','입주권 가능성',true],['splitLand','지분쪼개기 여부',false],
+    ['newVilla','신축 빌라 여부',false],['commerceRatio','상가 비율',false],
+  ]},
+  feasibility: { label:'📊 사업성 체크', items:[
+    ['landShare','대지지분',true],['zoning','용도지역',false],
+    ['roadWidth','도로 폭',false],['roadAccess','접도 조건',false],
+    ['aged','노후도',false],['newRatio','신축 비율',false],
+    ['density','건물 밀도',false],['nearbyApt','주변 신축 아파트 시세',false],
+    ['contribution','예상 분담금',true],['publicHousing','임대주택 비율 / 기부채납 여부',false],
+  ]},
+  residents:   { label:'👥 주민 분위기', items:[
+    ['proSign','찬성 현수막 / 안내문 여부',false],['antiSign','반대 현수막 / 벽보 여부',false],
+    ['union','조합 또는 추진위 활동 여부',false],['commerce','상가 소유자 반응',false],
+    ['owners','실거주 소유자 분위기',false],['agentConsensus','중개사별 의견 일치 여부',false],
+  ]},
+  risks:       { label:'⚠️ 거주·보유 리스크', items:[
+    ['canLive','실거주 가능 여부',false],['jeonse','전세 가능성',false],
+    ['monthly','월세 가능성',false],['parking','주차 가능성',false],
+    ['leak','누수 / 하자',false],['alley','골목 분위기',false],
+    ['flood','침수 리스크',false],['holdPeriod','사업 지연 시 보유 가능 기간',true],
+  ]},
+};
+
+const NRD_CL = {
+  location: { label:'📍 입지 체크', items:[
+    ['subway','역 접근성',true],['bus','버스 접근성',false],
+    ['mainRoad','대로변 접근성',false],['river','한강 접근성',false],
+    ['market','시장 / 마트 접근성',false],['hospital','병원 / 약국 접근성',false],
+    ['school','학교 / 학원 접근성',false],['park','공원 / 녹지 접근성',false],
+  ]},
+  living:   { label:'🌿 생활 환경 체크', items:[
+    ['noise','소음',true],['smell','냄새',true],['light','채광',false],
+    ['ventilation','통풍',false],['privacy','사생활',false],
+    ['safety','치안',false],['clean','청결도',false],['parking','주차',true],
+  ]},
+  building: { label:'🏗️ 건물 상태 체크', items:[
+    ['builtYear','준공연도',false],['exterior','외벽 상태',true],
+    ['roofWater','옥상 방수',false],['stairway','계단 / 복도 상태',false],
+    ['elevator','엘리베이터 유무 및 상태',false],['parkingLot','주차장 상태',false],
+    ['windows','창호 상태',false],['bathroom','욕실 상태',false],
+    ['kitchen','주방 상태',false],['boiler','보일러 상태',false],
+    ['utilities','전기 / 수도 상태',false],['illegal','위반건축물 여부',true],
+  ]},
+  price:    { label:'💰 가격·거래성 체크', items:[
+    ['salePrice','매매가',false],['jeonsePrice','전세가',false],
+    ['monthlyRent','월세 수준',false],['recentTrade','최근 실거래가',true],
+    ['listings','주변 매물 수',false],['priceAdj','가격 조정 가능성',true],
+    ['loan','대출 가능성',false],['liquidity','환금성',true],
+  ]},
+};
+
+const RD_VERDICT_CL = [
+  ['v1','구역 안 매물이 확실한가?',true],['v2','권리산정 기준일 문제가 없는가?',true],
+  ['v3','입주권 가능성이 명확한가?',true],['v4','대지지분이 괜찮은가?',true],
+  ['v5','신축 빌라가 너무 많지 않은가?',false],['v6','주민 반대가 심하지 않은가?',false],
+  ['v7','예상 분담금을 감당할 수 있는가?',true],['v8','사업 지연 시에도 버틸 수 있는가?',true],
+];
+const NRD_VERDICT_CL = [
+  ['v1','실거주 만족도가 높은가?',false],['v2','역 / 생활시설 접근성이 좋은가?',true],
+  ['v3','소음·냄새 리스크가 낮은가?',true],['v4','건물 상태가 양호한가?',true],
+  ['v5','주차 문제가 감당 가능한가?',false],['v6','가격이 주변 대비 합리적인가?',true],
+  ['v7','임대 수요가 있을 만한가?',false],['v8','나중에 팔기 쉬운가?',true],
+];
+
+// ── Q&A 정의 ──
+const RD_QA = {
+  business:    { label:'🏗️ 구역·사업 관련 질문', items:[
+    ['q01','이 매물이 정확히 어느 구역에 포함되나요?'],
+    ['q02','구역 경계도나 도면으로 확인 가능할까요?'],
+    ['q03','현재 사업 단계가 어디까지 진행됐나요?'],
+    ['q04','후보지인가요, 고시가 난 구역인가요?'],
+    ['q05','조합이나 추진위원회가 있나요?'],
+    ['q06','조합설립 동의율은 어느 정도인가요?'],
+    ['q07','사업 방식은 무엇인가요?'],
+    ['q08','최근 설명회나 주민총회가 있었나요?'],
+    ['q09','사업 지연 이슈가 있나요?'],
+  ]},
+  rights:      { label:'📋 권리·입주권 관련 질문', items:[
+    ['q10','권리산정 기준일이 언제인가요?'],
+    ['q11','이 매물은 기준일 이전 권리인가요?'],
+    ['q12','입주권 받을 수 있는 물건이 맞나요?'],
+    ['q13','지분쪼개기 이슈는 없나요?'],
+    ['q14','다가구에서 다세대로 전환된 이력이 있나요?'],
+    ['q15','위반건축물이나 무허가 부분은 없나요?'],
+    ['q16','상가 지분인지, 주택 지분인지 확실한가요?'],
+    ['q17','단독 입주권인지, 공유 지분인지 확인 가능할까요?'],
+    ['q18','등기부등본과 건축물대장 확인 가능할까요?'],
+  ]},
+  feasibility: { label:'📊 사업성·분담금 관련 질문', items:[
+    ['q19','대지지분이 몇 평인가요?'],
+    ['q20','이 정도 대지지분이면 사업성이 괜찮은 편인가요?'],
+    ['q21','주변 비슷한 물건의 대지지분은 어느 정도인가요?'],
+    ['q22','예상 분담금 이야기가 나오고 있나요?'],
+    ['q23','추가분담금이 커질 가능성은 어떤가요?'],
+    ['q24','임대주택 비율이나 기부채납 이야기가 있나요?'],
+    ['q25','조합원 분양가 예상치가 있나요?'],
+    ['q26','일반분양 물량이 어느 정도 나올 수 있나요?'],
+    ['q27','신축 후 예상 시세는 어느 정도로 보나요?'],
+  ]},
+  residents:   { label:'👥 주민 분위기 질문', items:[
+    ['q28','주민 찬성 분위기가 좋은 편인가요?'],
+    ['q29','반대하는 분들이 많은가요?'],
+    ['q30','상가 소유자들이 반대하는 분위기인가요?'],
+    ['q31','매도하려는 집주인이 많은 편인가요?'],
+    ['q32','실거주 소유자가 많은가요, 투자자가 많은가요?'],
+    ['q33','이 구역에서 가장 큰 걸림돌은 뭔가요?'],
+  ]},
+  price:       { label:'💰 매물 가격 질문', items:[
+    ['q34','최근 실거래가는 얼마였나요?'],
+    ['q35','이 매물 가격은 주변 대비 비싼 편인가요?'],
+    ['q36','가격 조정 가능성 있나요?'],
+    ['q37','급매인가요, 일반 매물인가요?'],
+    ['q38','집주인이 왜 매도하나요?'],
+    ['q39','비슷한 조건의 다른 매물도 있나요?'],
+    ['q40','세입자 만기는 언제인가요?'],
+    ['q41','전세 승계 가능한가요?'],
+    ['q42','대출은 어느 정도 가능할까요?'],
+  ]},
+};
+
+const NRD_QA = {
+  basic:       { label:'🏠 매물 기본 질문', items:[
+    ['q01','이 매물은 언제부터 나와 있었나요?'],
+    ['q02','집주인이 왜 매도하나요?'],
+    ['q03','가격 조정 가능성 있나요?'],
+    ['q04','최근 같은 건물이나 근처 실거래가는 얼마였나요?'],
+    ['q05','비슷한 조건의 다른 매물은 얼마인가요?'],
+    ['q06','급매인가요, 일반 매물인가요?'],
+    ['q07','등기부등본 확인 가능할까요?'],
+    ['q08','건축물대장 확인 가능할까요?'],
+  ]},
+  building:    { label:'🏗️ 건물 상태 질문', items:[
+    ['q09','누수 이력 있나요?'],['q10','곰팡이나 결로 이슈 있었나요?'],
+    ['q11','보일러 교체 시기는 언제인가요?'],['q12','샷시 교체됐나요?'],
+    ['q13','옥상 방수 공사는 최근에 했나요?'],['q14','배관 문제 있었나요?'],
+    ['q15','수압은 괜찮나요?'],['q16','엘리베이터 관리 상태는 어떤가요?'],
+    ['q17','관리비는 얼마이고 무엇이 포함되나요?'],
+    ['q18','장기수선충당금이나 별도 수리비 이슈 있나요?'],
+  ]},
+  environment: { label:'🌿 생활 환경 질문', items:[
+    ['q19','이 집 주변이 밤에도 조용한 편인가요?'],
+    ['q20','오토바이 소음이나 배달 소음 많나요?'],
+    ['q21','음식점 냄새나 하수구 냄새 이슈 있나요?'],
+    ['q22','쓰레기 배출 위치가 어디인가요?'],
+    ['q23','주차는 실제로 가능한가요?'],['q24','세대당 몇 대 주차 가능한가요?'],
+    ['q25','주변에 민원 많은 시설이 있나요?'],['q26','밤길은 안전한 편인가요?'],
+    ['q27','시장이나 상권이 가까워서 불편한 점은 없나요?'],
+  ]},
+  rental:      { label:'📈 임대·환금성 질문', items:[
+    ['q28','전세는 잘 나가는 지역인가요?'],['q29','월세 수요는 어떤 편인가요?'],
+    ['q30','주로 어떤 사람들이 임차하나요?'],['q31','공실이 잘 나는 편인가요?'],
+    ['q32','나중에 매도할 때 잘 팔리는 타입인가요?'],
+    ['q33','이 면적대 수요가 많은가요?'],['q34','주변에 경쟁 매물이 많은가요?'],
+    ['q35','가격이 오르기보다 방어가 잘 되는 물건인가요?'],
+  ]},
+  contract:    { label:'📝 대출·계약 질문', items:[
+    ['q36','이 물건 대출은 어느 정도 가능할까요?'],['q37','방공제 적용되나요?'],
+    ['q38','전세 끼고 매수 가능한가요?'],['q39','세입자 보증금은 안전한가요?'],
+    ['q40','근저당이나 압류 이슈 없나요?'],['q41','잔금일 조율 가능한가요?'],
+    ['q42','특약에 넣어야 할 내용이 있을까요?'],
+    ['q43','하자 발견 시 보수 조건 넣을 수 있나요?'],
+  ]},
+};
+
+// ════════════════════════════════
+// 섹션 전환
+// ════════════════════════════════
+let currentFieldSection = 'units';
+let currentQAreaType = 'rd';
+
+function switchFieldSection(sec) {
+  currentFieldSection = sec;
+  document.querySelectorAll('.field-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.field-stab').forEach(t => t.classList.remove('active'));
+  const secEl = document.getElementById('field-section-' + sec);
+  if (secEl) secEl.classList.add('active');
+  const tabEl = document.querySelector(`.field-stab[data-sec="${sec}"]`);
+  if (tabEl) tabEl.classList.add('active');
+
+  if (sec === 'redevelop')    renderRedevelopCL();
+  if (sec === 'nonredevelop') renderNonRedevelopCL();
+  if (sec === 'questions')    renderQuestions();
+  if (sec === 'memo')         renderFieldMemoForm();
+  if (sec === 'verdict')      renderVerdict();
+}
+
+// ════════════════════════════════
+// 데이터 헬퍼
+// ════════════════════════════════
+function getImjang() {
+  if (!D.step6) D.step6 = { units:[{},{},{},{}], food:{} };
+  if (!D.step6.imjang) D.step6.imjang = {};
+  return D.step6.imjang;
+}
+function getClData(type, section) {
+  const im = getImjang();
+  const k = type + 'CL';
+  if (!im[k]) im[k] = {};
+  if (!im[k][section]) im[k][section] = {};
+  return im[k][section];
+}
+function updateCLItem(type, section, key, field, value) {
+  const data = getClData(type, section);
+  if (!data[key]) data[key] = {};
+  data[key][field] = value;
+  save();
+  refreshCLProgress(type, section);
+}
+function toggleCLFlag(type, section, key, btn) {
+  const data = getClData(type, section);
+  if (!data[key]) data[key] = {};
+  data[key].needCheck = !data[key].needCheck;
+  btn.classList.toggle('flagged', !!data[key].needCheck);
+  btn.textContent = data[key].needCheck ? '🔖 확인필요' : '확인필요';
+  save();
+}
+function refreshCLProgress(type, section) {
+  const def = type === 'rd' ? RD_CL : NRD_CL;
+  const items = def[section]?.items || [];
+  const data  = getClData(type, section);
+  const checked = items.filter(([k]) => data[k]?.checked).length;
+  const total   = items.length;
+  const pct     = total ? (checked / total) * 100 : 0;
+  const progEl  = document.getElementById(`cl-prog-${type}-${section}`);
+  const barEl   = document.getElementById(`cl-bar-${type}-${section}`);
+  if (progEl) {
+    progEl.textContent = `${checked}/${total} 완료`;
+    progEl.className = 'cl-acc-progress' + (checked === total && total > 0 ? ' done' : checked > 0 ? ' partial' : '');
+  }
+  if (barEl) barEl.style.width = pct + '%';
+}
+
+// ════════════════════════════════
+// 아코디언 토글
+// ════════════════════════════════
+function toggleAccordion(id) {
+  const body  = document.getElementById('cl-body-' + id);
+  const arrow = document.getElementById('cl-arr-' + id);
+  if (!body) return;
+  const open = body.classList.toggle('open');
+  if (arrow) arrow.classList.toggle('open', open);
+}
+
+// ════════════════════════════════
+// 체크리스트 섹션 렌더
+// ════════════════════════════════
+function renderCLSection(type, sKey, def, data) {
+  const items   = def.items;
+  const checked = items.filter(([k]) => data[k]?.checked).length;
+  const total   = items.length;
+  const pct     = total ? (checked / total) * 100 : 0;
+  const progCls = checked === total && total > 0 ? ' done' : checked > 0 ? ' partial' : '';
+
+  const itemsHtml = items.map(([key, label, important]) => {
+    const item = data[key] || {};
+    const safeVal = (item.memo || '').replace(/"/g, '&quot;');
+    return `<div class="cl-item">
+      <div class="cl-item-row">
+        <input type="checkbox" class="cl-cb" ${item.checked ? 'checked' : ''}
+          onchange="updateCLItem('${type}','${sKey}','${key}','checked',this.checked)">
+        <label class="cl-item-label${important ? ' important' : ''}"
+          onclick="this.previousElementSibling.click()">${label}</label>
+        <button class="cl-flag-btn${item.needCheck ? ' flagged' : ''}"
+          onclick="toggleCLFlag('${type}','${sKey}','${key}',this)">
+          ${item.needCheck ? '🔖 확인필요' : '확인필요'}
+        </button>
+      </div>
+      <div class="cl-memo-wrap">
+        <input type="text" class="cl-memo-input" value="${safeVal}"
+          placeholder="메모..." onchange="updateCLItem('${type}','${sKey}','${key}','memo',this.value)">
+      </div>
+    </div>`;
+  }).join('');
+
+  return `<div class="cl-accordion">
+    <div class="cl-acc-header" onclick="toggleAccordion('${type}-${sKey}')">
+      <span class="cl-acc-label">${def.label}</span>
+      <span class="cl-acc-progress${progCls}" id="cl-prog-${type}-${sKey}">${checked}/${total} 완료</span>
+      <span class="cl-acc-arrow" id="cl-arr-${type}-${sKey}">▼</span>
+    </div>
+    <div class="cl-acc-bar"><div class="cl-acc-bar-fill" id="cl-bar-${type}-${sKey}" style="width:${pct}%"></div></div>
+    <div class="cl-acc-body" id="cl-body-${type}-${sKey}">${itemsHtml}</div>
+  </div>`;
+}
+
+function renderVerdictCLSection(type) {
+  const verdictCL = type === 'rd' ? RD_VERDICT_CL : NRD_VERDICT_CL;
+  const im = getImjang();
+  const key = type + 'Verdict';
+  if (!im[key]) im[key] = {};
+  const vData = im[key];
+  const checked = verdictCL.filter(([k]) => vData[k]?.checked).length;
+  const total = verdictCL.length;
+  const pct = total ? (checked/total)*100 : 0;
+
+  const itemsHtml = verdictCL.map(([k, label, imp]) =>
+    `<div class="cl-item"><div class="cl-item-row">
+      <input type="checkbox" class="cl-cb" ${vData[k]?.checked ? 'checked' : ''}
+        onchange="updateVerdictCL('${type}','${k}',this.checked)">
+      <label class="cl-item-label${imp?' important':''}" onclick="this.previousElementSibling.click()">${label}</label>
+    </div></div>`
+  ).join('');
+
+  const label = type === 'rd' ? '⚖️ 재개발 최종 판단 체크리스트' : '⚖️ 비재개발 최종 판단 체크리스트';
+  return `<div class="cl-accordion" style="border-color:var(--gold);">
+    <div class="cl-acc-header" onclick="toggleAccordion('vcl-${type}')">
+      <span class="cl-acc-label">${label}</span>
+      <span class="cl-acc-progress${checked===total&&total>0?' done':checked>0?' partial':''}">${checked}/${total} 확인</span>
+      <span class="cl-acc-arrow" id="cl-arr-vcl-${type}">▼</span>
+    </div>
+    <div class="cl-acc-bar"><div class="cl-acc-bar-fill" style="width:${pct}%"></div></div>
+    <div class="cl-acc-body" id="cl-body-vcl-${type}">${itemsHtml}</div>
+  </div>`;
+}
+
+function renderVerdictInputSection(type) {
+  const im = getImjang();
+  const vk = type + 'VerdictInput';
+  if (!im[vk]) im[vk] = {};
+  const v = im[vk];
+  const isRd = type === 'rd';
+  const borderColor = isRd ? 'var(--accent)' : 'var(--green)';
+  const title = isRd ? '⚖️ 재개발 지역 최종 판단 입력' : '⚖️ 비재개발 지역 최종 판단 입력';
+
+  const attrRow = isRd
+    ? `<div class="frow"><div class="fg"><label>투자 매력도</label><div class="radio-group">${['상','중','하'].map(opt=>`<div class="radio-btn${v.attraction===opt?' sel':''}" onclick="updateVInput('${type}','attraction','${opt}',this)">${opt}</div>`).join('')}</div></div></div>`
+    : `<div class="frow col2">
+        <div class="fg"><label>실거주 매력도</label><div class="radio-group">${['상','중','하'].map(opt=>`<div class="radio-btn${v.liveAttr===opt?' sel':''}" onclick="updateVInput('${type}','liveAttr','${opt}',this)">${opt}</div>`).join('')}</div></div>
+        <div class="fg"><label>투자 매력도</label><div class="radio-group">${['상','중','하'].map(opt=>`<div class="radio-btn${v.investAttr===opt?' sel':''}" onclick="updateVInput('${type}','investAttr','${opt}',this)">${opt}</div>`).join('')}</div></div>
+      </div>`;
+
+  const decisionColors = {'적극 검토':'var(--green)','보류':'var(--gold)','제외':'var(--red)'};
+  const decisionRow = `<div class="frow"><div class="fg"><label>최종 판단</label><div class="radio-group">
+    ${['적극 검토','보류','제외'].map(opt=>`<div class="radio-btn${v.decision===opt?' sel':''}" style="border-color:${decisionColors[opt]};color:${decisionColors[opt]};" onclick="updateVInput('${type}','decision','${opt}',this)">${opt}</div>`).join('')}
+  </div></div></div>`;
+
+  return `<div class="form-section" style="border-color:${borderColor};margin-top:10px;">
+    <div class="form-section-title">${title}</div>
+    ${attrRow}
+    <div class="frow"><div class="fg"><label>가장 큰 장점</label>
+      <textarea class="fi" placeholder="예: 역세권 + 대지지분 양호" onchange="updateVInput('${type}','bigPro',this.value,null)">${v.bigPro||''}</textarea>
+    </div></div>
+    <div class="frow"><div class="fg"><label>가장 큰 리스크</label>
+      <textarea class="fi" placeholder="예: 주민 반대, 분담금 불확실" onchange="updateVInput('${type}','bigRisk',this.value,null)">${v.bigRisk||''}</textarea>
+    </div></div>
+    <div class="frow"><div class="fg"><label>추가 확인 필요 사항</label>
+      <input class="fi" value="${(v.needConfirm||'').replace(/"/g,'&quot;')}" placeholder="예: 등기부등본, 구역도 확인" onchange="updateVInput('${type}','needConfirm',this.value,null)">
+    </div></div>
+    ${decisionRow}
+    <button class="btn-save" style="margin-top:8px;width:100%;" onclick="saveVInput('${type}')">💾 저장</button>
+  </div>`;
+}
+
+function updateVerdictCL(type, key, checked) {
+  const im = getImjang();
+  const k = type + 'Verdict';
+  if (!im[k]) im[k] = {};
+  if (!im[k][key]) im[k][key] = {};
+  im[k][key].checked = checked;
+  save();
+}
+function updateVInput(type, field, value, btn) {
+  const im = getImjang();
+  const k = type + 'VerdictInput';
+  if (!im[k]) im[k] = {};
+  im[k][field] = value;
+  if (btn) {
+    btn.closest('.radio-group').querySelectorAll('.radio-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+  }
+}
+function saveVInput(type) { save(); showToast('✅ 저장됨'); }
+
+// ════════════════════════════════
+// 재개발 / 비재개발 렌더
+// ════════════════════════════════
+function renderRedevelopCL() {
+  const im = getImjang();
+  const rdData = im.rdCL || {};
+  let html = '';
+  Object.entries(RD_CL).forEach(([sKey, def]) => {
+    html += renderCLSection('rd', sKey, def, rdData[sKey] || {});
+  });
+  html += renderVerdictCLSection('rd');
+  html += renderVerdictInputSection('rd');
+  document.getElementById('redevelop-checklist-content').innerHTML = html;
+}
+
+function renderNonRedevelopCL() {
+  const im = getImjang();
+  const nrdData = im.nrdCL || {};
+  let html = '';
+  Object.entries(NRD_CL).forEach(([sKey, def]) => {
+    html += renderCLSection('nrd', sKey, def, nrdData[sKey] || {});
+  });
+  html += renderVerdictCLSection('nrd');
+  html += renderVerdictInputSection('nrd');
+  document.getElementById('nonredevelop-checklist-content').innerHTML = html;
+}
+
+// ════════════════════════════════
+// Q&A 렌더
+// ════════════════════════════════
+function setQAreaType(type) {
+  currentQAreaType = type;
+  document.getElementById('q-btn-rd').classList.toggle('sel', type === 'rd');
+  document.getElementById('q-btn-nrd').classList.toggle('sel', type === 'nrd');
+  renderQuestionsContent();
+}
+function renderQuestions() {
+  document.getElementById('q-btn-rd').classList.toggle('sel', currentQAreaType === 'rd');
+  document.getElementById('q-btn-nrd').classList.toggle('sel', currentQAreaType === 'nrd');
+  renderQuestionsContent();
+}
+function renderQuestionsContent() {
+  const im = getImjang();
+  const qaDef = currentQAreaType === 'rd' ? RD_QA : NRD_QA;
+  const qaStore = im[(currentQAreaType === 'rd' ? 'rdQA' : 'nrdQA')] || {};
+  let html = '';
+  Object.entries(qaDef).forEach(([sKey, def]) => {
+    const sData = qaStore[sKey] || {};
+    const checked = def.items.filter(([k]) => sData[k]?.checked).length;
+    const total   = def.items.length;
+    const pct     = total ? (checked/total)*100 : 0;
+    const progCls = checked===total&&total>0?' done':checked>0?' partial':'';
+
+    const itemsHtml = def.items.map(([key, question]) => {
+      const item = sData[key] || {};
+      const safeAns = (item.answer||'').replace(/"/g,'&quot;');
+      return `<div class="qa-item">
+        <div class="qa-item-top">
+          <input type="checkbox" class="qa-cb" ${item.checked?'checked':''}
+            onchange="updateQA('${currentQAreaType}','${sKey}','${key}','checked',this.checked)">
+          <div class="qa-question">${question}</div>
+          <button class="qa-flag-btn${item.needCheck?' flagged':''}"
+            onclick="toggleQAFlag('${currentQAreaType}','${sKey}','${key}',this)">
+            ${item.needCheck?'🔖':'확인필요'}
+          </button>
+        </div>
+        <input type="text" class="qa-answer-input" value="${safeAns}"
+          placeholder="답변 메모..."
+          onchange="updateQA('${currentQAreaType}','${sKey}','${key}','answer',this.value)">
+      </div>`;
+    }).join('');
+
+    html += `<div class="cl-accordion" style="margin-bottom:8px;">
+      <div class="cl-acc-header" onclick="toggleAccordion('qa-${currentQAreaType}-${sKey}')">
+        <span class="cl-acc-label">${def.label}</span>
+        <span class="cl-acc-progress${progCls}">${checked}/${total} 확인</span>
+        <span class="cl-acc-arrow" id="cl-arr-qa-${currentQAreaType}-${sKey}">▼</span>
+      </div>
+      <div class="cl-acc-bar"><div class="cl-acc-bar-fill" style="width:${pct}%"></div></div>
+      <div class="cl-acc-body" id="cl-body-qa-${currentQAreaType}-${sKey}">
+        <div style="padding-top:8px;">${itemsHtml}</div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('questions-content').innerHTML = html;
+}
+function updateQA(type, section, key, field, value) {
+  const im = getImjang();
+  const k = (type === 'rd' ? 'rdQA' : 'nrdQA');
+  if (!im[k]) im[k] = {};
+  if (!im[k][section]) im[k][section] = {};
+  if (!im[k][section][key]) im[k][section][key] = {};
+  im[k][section][key][field] = value;
+  save();
+}
+function toggleQAFlag(type, section, key, btn) {
+  const im = getImjang();
+  const k = (type === 'rd' ? 'rdQA' : 'nrdQA');
+  if (!im[k]) im[k] = {};
+  if (!im[k][section]) im[k][section] = {};
+  if (!im[k][section][key]) im[k][section][key] = {};
+  im[k][section][key].needCheck = !im[k][section][key].needCheck;
+  btn.classList.toggle('flagged', !!im[k][section][key].needCheck);
+  btn.textContent = im[k][section][key].needCheck ? '🔖' : '확인필요';
+  save();
+}
+
+// ════════════════════════════════
+// 현장 메모
+// ════════════════════════════════
+function renderFieldMemoForm() {
+  const im = getImjang();
+  const memo = im.fieldMemo || {};
+  const FIELDS = [
+    ['date','임장 날짜','date',''],
+    ['timeSlot','임장 시간대','select','평일 낮|평일 밤|주말 낮|주말 밤'],
+    ['weather','날씨','text','예: 맑음, 흐림, 비'],
+    ['address','주소','text','정확한 주소'],
+    ['station','가장 가까운 역','text','예: 합정역'],
+    ['walkTime','실제 도보 시간','text','예: 도보 5분'],
+    ['atmosphere','주변 분위기','textarea','자유롭게 메모'],
+    ['noise','소음','text','예: 조용함 / 대로변 소음'],
+    ['smell','냄새','text','예: 없음 / 음식점 냄새'],
+    ['parking','주차','text','예: 협소 / 건물 주차장 있음'],
+    ['alleyWidth','골목 폭','text','예: 차 1대 통행 가능'],
+    ['trash','쓰레기 배출 상태','text','예: 정해진 구역 있음'],
+    ['photoMemo','사진 메모','textarea','찍어야 할 포인트 / 찍은 것 메모'],
+    ['recheck','다시 확인해야 할 사항','textarea',''],
+  ];
+
+  const rows = FIELDS.map(([key, label, type, placeholder]) => {
+    const val = (memo[key] || '').replace(/"/g, '&quot;');
+    if (type === 'select') {
+      const opts = placeholder.split('|').map(o =>
+        `<option ${memo[key]===o?'selected':''}>${o}</option>`).join('');
+      return `<div class="frow"><div class="fg"><label>${label}</label>
+        <select class="fi" onchange="updateMemo('${key}',this.value)">
+          <option value="">선택</option>${opts}
+        </select></div></div>`;
+    }
+    if (type === 'textarea') {
+      return `<div class="frow"><div class="fg"><label>${label}</label>
+        <textarea class="fi" placeholder="${placeholder}"
+          onchange="updateMemo('${key}',this.value)">${memo[key]||''}</textarea></div></div>`;
+    }
+    return `<div class="frow"><div class="fg"><label>${label}</label>
+      <input class="fi" type="${type}" value="${val}" placeholder="${placeholder}"
+        onchange="updateMemo('${key}',this.value)"></div></div>`;
+  }).join('');
+
+  document.getElementById('field-memo-content').innerHTML = `
+    <div class="form-section" style="margin-top:4px;">
+      <div class="form-section-title">📝 현장 메모</div>
+      ${rows}
+      <button class="btn-save" style="width:100%;margin-top:8px;" onclick="saveMemo()">💾 현장 메모 저장</button>
+    </div>`;
+}
+function updateMemo(key, value) {
+  const im = getImjang();
+  if (!im.fieldMemo) im.fieldMemo = {};
+  im.fieldMemo[key] = value;
+}
+function saveMemo() { save(); showToast('✅ 현장 메모 저장됨'); }
+
+// ════════════════════════════════
+// 최종 판단 요약 카드
+// ════════════════════════════════
+function collectFlagged() {
+  const im = getImjang();
+  const result = [];
+  const rdCL = im.rdCL || {}; const nrdCL = im.nrdCL || {};
+  const rdQA = im.rdQA || {}; const nrdQA = im.nrdQA || {};
+  Object.entries(RD_CL).forEach(([s, def]) => {
+    def.items.forEach(([k, lbl]) => { if (rdCL[s]?.[k]?.needCheck) result.push('[재개발] ' + lbl); });
+  });
+  Object.entries(NRD_CL).forEach(([s, def]) => {
+    def.items.forEach(([k, lbl]) => { if (nrdCL[s]?.[k]?.needCheck) result.push('[비재개발] ' + lbl); });
+  });
+  Object.entries(RD_QA).forEach(([s, def]) => {
+    def.items.forEach(([k, q]) => { if (rdQA[s]?.[k]?.needCheck) result.push('[재개발 Q] ' + q.slice(0,28)+'…'); });
+  });
+  Object.entries(NRD_QA).forEach(([s, def]) => {
+    def.items.forEach(([k, q]) => { if (nrdQA[s]?.[k]?.needCheck) result.push('[비재개발 Q] ' + q.slice(0,28)+'…'); });
+  });
+  return result;
+}
+function collectUncheckedImportant() {
+  const im = getImjang();
+  const result = [];
+  const rdCL = im.rdCL || {}; const nrdCL = im.nrdCL || {};
+  Object.entries(RD_CL).forEach(([s, def]) => {
+    def.items.filter(([,, imp]) => imp).forEach(([k, lbl]) => {
+      if (!rdCL[s]?.[k]?.checked) result.push('[재개발] ' + lbl);
+    });
+  });
+  Object.entries(NRD_CL).forEach(([s, def]) => {
+    def.items.filter(([,, imp]) => imp).forEach(([k, lbl]) => {
+      if (!nrdCL[s]?.[k]?.checked) result.push('[비재개발] ' + lbl);
+    });
+  });
+  return result;
+}
+
+function renderVerdict() {
+  const im = getImjang();
+  const v = im.mainVerdict || {};
+  const flagged   = collectFlagged();
+  const unchecked = collectUncheckedImportant();
+
+  const autoSummary = (flagged.length || unchecked.length) ? `
+    <div class="form-section" style="border-color:var(--gold);margin-bottom:12px;">
+      <div class="form-section-title">🤖 자동 요약 — 미완료 / 추가확인 항목</div>
+      ${flagged.length ? `<div style="margin-bottom:10px;">
+        <div style="font-size:11px;color:var(--gold);font-weight:600;margin-bottom:6px;">🔖 추가 확인 필요 ${flagged.length}건</div>
+        <div class="summary-flags">${flagged.map(f=>`<div class="summary-flag-item"><span class="summary-flag-dot">🔸</span>${f}</div>`).join('')}</div>
+      </div>` : ''}
+      ${unchecked.length ? `<div>
+        <div style="font-size:11px;color:var(--text3);font-weight:600;margin-bottom:6px;">⬜ 중요 미완료 항목 ${unchecked.length}건</div>
+        <div class="summary-flags">${unchecked.slice(0,10).map(u=>`<div class="summary-flag-item"><span class="summary-flag-dot">⚠️</span>${u}</div>`).join('')}</div>
+      </div>` : ''}
+    </div>` : `<div style="background:var(--green-dim,#2ecc8f15);border:1px solid var(--green);border-radius:var(--r);padding:12px 16px;margin-bottom:12px;font-size:13px;color:var(--green);">✅ 미완료 중요 항목 없음 — 체크리스트 완료!</div>`;
+
+  const decClrs = {'적극 검토':'var(--green)','보류':'var(--gold)','제외':'var(--red)'};
+  const html = `
+    ${autoSummary}
+    <div class="form-section" style="margin-bottom:12px;">
+      <div class="form-section-title">⚖️ 종합 최종 판단 카드</div>
+      <div class="frow">
+        <div class="fg"><label>지역 유형</label><div class="radio-group">
+          <div class="radio-btn${v.areaType==='rd'?' sel':''}" onclick="updateMainV('areaType','rd',this)">🏗️ 재개발 지역</div>
+          <div class="radio-btn${v.areaType==='nrd'?' sel':''}" onclick="updateMainV('areaType','nrd',this)">🏠 비재개발 지역</div>
+        </div></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>종합 점수 (100점 만점)</label>
+          <div style="display:flex;align-items:center;gap:12px;">
+            <input class="fi" type="number" min="0" max="100" style="width:100px;"
+              value="${v.score||''}" placeholder="70"
+              oninput="updateMainV('score',this.value,null);document.getElementById('score-display').textContent=this.value?this.value+'점':'—'">
+            <div id="score-display" style="font-size:32px;font-weight:900;color:var(--gold);">${v.score?v.score+'점':'—'}</div>
+          </div>
+        </div>
+      </div>
+      <div class="frow"><div class="fg"><label>핵심 장점 3가지</label>
+        <textarea class="fi" placeholder="① ② ③" onchange="updateMainV('pros',this.value,null)">${v.pros||''}</textarea>
+      </div></div>
+      <div class="frow"><div class="fg"><label>핵심 리스크 3가지</label>
+        <textarea class="fi" placeholder="① ② ③" onchange="updateMainV('risks',this.value,null)">${v.risks||''}</textarea>
+      </div></div>
+      <div class="frow"><div class="fg"><label>추가 확인 필요 서류</label>
+        <textarea class="fi" placeholder="등기부등본 / 건축물대장 / 구역도 / 토지대장 등" onchange="updateMainV('docs',this.value,null)">${v.docs||''}</textarea>
+      </div></div>
+      <div class="frow"><div class="fg"><label>다음 액션</label>
+        <textarea class="fi" placeholder="예: 야간 재임장 / 실거래가 재확인 / 부동산 재문의" onchange="updateMainV('actions',this.value,null)">${v.actions||''}</textarea>
+      </div></div>
+      <div class="frow"><div class="fg"><label>최종 판단</label><div class="radio-group">
+        ${['적극 검토','보류','제외'].map(opt=>`<div class="radio-btn${v.decision===opt?' sel':''}"
+          style="border-color:${decClrs[opt]};color:${decClrs[opt]};"
+          onclick="updateMainV('decision','${opt}',this)">${opt}</div>`).join('')}
+      </div></div></div>
+      <button class="btn-save gold" style="width:100%;margin-top:12px;" onclick="saveMainVerdict()">⚖️ 최종 판단 저장</button>
+    </div>`;
+
+  document.getElementById('verdict-content').innerHTML = html;
+}
+function updateMainV(field, value, btn) {
+  const im = getImjang();
+  if (!im.mainVerdict) im.mainVerdict = {};
+  im.mainVerdict[field] = value;
+  if (btn) {
+    btn.closest('.radio-group').querySelectorAll('.radio-btn').forEach(b => b.classList.remove('sel'));
+    btn.classList.add('sel');
+  }
+}
+function saveMainVerdict() { save(); showToast('⚖️ 최종 판단 저장됨'); }
 </script>
 </body>
 </html>
