@@ -2192,11 +2192,9 @@ function updateCLItem(type, section, key, field, value) {
   const data = getClData(type, section);
   if (!data[key]) data[key] = {};
   data[key][field] = value;
-  // 메모를 입력하면 자동으로 체크
+  // 메모를 입력하면 자동으로 완료 처리
   if (field === 'memo' && value && value.trim()) {
     data[key].checked = true;
-    const cb = document.getElementById(`cb-${type}-${section}-${key}`);
-    if (cb) cb.checked = true;
   }
   save();
   refreshCLProgress(type, section);
@@ -2219,7 +2217,7 @@ function refreshCLProgress(type, section) {
   const progEl  = document.getElementById(`cl-prog-${type}-${section}`);
   const barEl   = document.getElementById(`cl-bar-${type}-${section}`);
   if (progEl) {
-    progEl.textContent = `${checked}/${total} 완료`;
+    progEl.textContent = `${checked}/${total} 작성됨`;
     progEl.className = 'cl-acc-progress' + (checked === total && total > 0 ? ' done' : checked > 0 ? ' partial' : '');
   }
   if (barEl) barEl.style.width = pct + '%';
@@ -2267,10 +2265,7 @@ function renderCLSection(type, sKey, def, data) {
     const safeVal = (item.memo || '').replace(/"/g, '&quot;');
     return `<div class="cl-item">
       <div class="cl-item-row">
-        <input type="checkbox" class="cl-cb" id="cb-${type}-${sKey}-${key}" ${item.checked ? 'checked' : ''}
-          onchange="updateCLItem('${type}','${sKey}','${key}','checked',this.checked)">
-        <label class="cl-item-label${important ? ' important' : ''}"
-          for="cb-${type}-${sKey}-${key}">${label}</label>
+        <span class="cl-item-label${important ? ' important' : ''}">${label}</span>
         <button class="cl-flag-btn${item.needCheck ? ' flagged' : ''}"
           onclick="toggleCLFlag('${type}','${sKey}','${key}',this)">
           ${item.needCheck ? '🔖 확인필요' : '확인필요'}
@@ -2278,7 +2273,7 @@ function renderCLSection(type, sKey, def, data) {
       </div>
       <div class="cl-memo-wrap">
         <input type="text" class="cl-memo-input" value="${safeVal}"
-          placeholder="메모 입력 시 자동 체크됩니다" onchange="updateCLItem('${type}','${sKey}','${key}','memo',this.value)">
+          placeholder="메모 입력 시 자동 완료 처리" onchange="updateCLItem('${type}','${sKey}','${key}','memo',this.value)">
       </div>
     </div>`;
   }).join('');
@@ -2286,7 +2281,7 @@ function renderCLSection(type, sKey, def, data) {
   return `<div class="cl-accordion">
     <div class="cl-acc-header" onclick="toggleAccordion('${type}-${sKey}')">
       <span class="cl-acc-label">${def.label}</span>
-      <span class="cl-acc-progress${progCls}" id="cl-prog-${type}-${sKey}">${checked}/${total} 완료</span>
+      <span class="cl-acc-progress${progCls}" id="cl-prog-${type}-${sKey}">${checked}/${total} 작성됨</span>
       <span class="cl-acc-arrow" id="cl-arr-${type}-${sKey}">▼</span>
     </div>
     <div class="cl-acc-bar"><div class="cl-acc-bar-fill" id="cl-bar-${type}-${sKey}" style="width:${pct}%"></div></div>
@@ -2304,13 +2299,12 @@ function renderVerdictCLSection(type) {
   const total = verdictCL.length;
   const pct = total ? (checked/total)*100 : 0;
 
-  const itemsHtml = verdictCL.map(([k, label, imp]) =>
-    `<div class="cl-item"><div class="cl-item-row">
-      <input type="checkbox" class="cl-cb" ${vData[k]?.checked ? 'checked' : ''}
-        onchange="updateVerdictCL('${type}','${k}',this.checked)">
-      <label class="cl-item-label${imp?' important':''}" onclick="this.previousElementSibling.click()">${label}</label>
-    </div></div>`
-  ).join('');
+  const itemsHtml = verdictCL.map(([k, label, imp]) => {
+    const done = vData[k]?.checked;
+    return `<div class="cl-item"><div class="cl-item-row" style="cursor:pointer;" onclick="toggleVerdictItem('${type}','${k}',this)">
+      <span class="cl-item-label${imp?' important':''}" style="flex:1;">${done ? '✅' : '⬜'} ${label}</span>
+    </div></div>`;
+  }).join('');
 
   const label = type === 'rd' ? '⚖️ 재개발 최종 판단 체크리스트' : '⚖️ 비재개발 최종 판단 체크리스트';
   return `<div class="cl-accordion" style="border-color:var(--gold);">
@@ -2369,6 +2363,29 @@ function updateVerdictCL(type, key, checked) {
   if (!ud[k][key]) ud[k][key] = {};
   ud[k][key].checked = checked;
   save();
+}
+function toggleVerdictItem(type, key, row) {
+  const ud = getUnitImjang(currentUnitIdx);
+  const k = type + 'Verdict';
+  if (!ud[k]) ud[k] = {};
+  if (!ud[k][key]) ud[k][key] = {};
+  const current = ud[k][key].checked || false;
+  ud[k][key].checked = !current;
+  // DOM 즉시 업데이트
+  const span = row.querySelector('span');
+  const label = span.textContent.replace(/^[✅⬜] /, '');
+  span.textContent = (!current ? '✅' : '⬜') + ' ' + label;
+  save();
+  // 진행률 업데이트
+  const verdictCL = type === 'rd' ? RD_VERDICT_CL : NRD_VERDICT_CL;
+  const vData = ud[k];
+  const checked2 = verdictCL.filter(([k2]) => vData[k2]?.checked).length;
+  const total = verdictCL.length;
+  const progEl = document.querySelector(`.cl-accordion[style*="border-color:var(--gold)"] .cl-acc-progress`);
+  if (progEl) {
+    progEl.textContent = `${checked2}/${total} 확인`;
+    progEl.className = 'cl-acc-progress' + (checked2 === total && total > 0 ? ' done' : checked2 > 0 ? ' partial' : '');
+  }
 }
 function updateVInput(type, field, value, btn) {
   const ud = getUnitImjang(currentUnitIdx);
