@@ -371,6 +371,17 @@ body {
 }
 .submit-btn:hover { opacity: 0.85; }
 
+.cancel-btn {
+  flex: 0 0 auto;
+  padding: 11px 16px;
+  background: var(--surf2);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  color: var(--text2); font-family: inherit; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all 0.15s;
+}
+.cancel-btn:hover { background: var(--surf3); color: var(--text); }
+
 .section-title {
   font-size: 16px; font-weight: 700;
   margin-bottom: 20px;
@@ -597,6 +608,7 @@ body {
 
 /* 용어사전 */
 .submit-btn { border-radius: 9999px; }
+.cancel-btn { border-radius: 9999px; }
 .conso-btn { border-radius: 9999px; }
 .conso-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
 .glossary-card { border-radius: 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
@@ -763,7 +775,7 @@ body {
 
     <!-- Left sidebar: Add form -->
     <div class="glossary-sidebar">
-      <div class="section-title">📘 용어 등록</div>
+      <div class="section-title" id="g-form-title">📘 용어 등록</div>
 
       <div class="form-group">
         <label class="form-label">용어명</label>
@@ -783,7 +795,10 @@ body {
         </select>
       </div>
 
-      <button class="submit-btn" onclick="addGlossaryItem()">＋ 용어 등록하기</button>
+      <div id="g-form-actions" style="display:flex;gap:8px;">
+        <button class="submit-btn" id="g-submit-btn" onclick="submitGlossaryForm()">＋ 용어 등록하기</button>
+        <button class="cancel-btn" id="g-cancel-btn" onclick="cancelGlossaryEdit()" style="display:none;">취소</button>
+      </div>
 
       <div style="margin-top:24px;padding-top:20px;border-top:1px solid var(--border);">
         <div style="font-size:12px;color:var(--text3);line-height:1.7;">
@@ -821,7 +836,11 @@ body {
         </label>
         <div style="font-size:12px;color:var(--text3);" id="policy-abolished-count"></div>
       </div>
-      <button class="policy-add-btn" onclick="openPolicyModal()">＋ 정책 추가</button>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <input class="search-input" id="p-search" placeholder="🔍  정책명 또는 메모 검색"
+               oninput="renderPolicy()" style="width:220px;" />
+        <button class="policy-add-btn" onclick="openPolicyModal()">＋ 정책 추가</button>
+      </div>
     </div>
 
     <div class="policy-content" id="policy-content">
@@ -891,7 +910,7 @@ body {
 
 <script>
 /* ═══════════════════════════════════════════
-   FIREBASE + IMJANG DATA (unchanged)
+   FIREBASE — imjang_records 멀티 기록 구조
 ═══════════════════════════════════════════ */
 const firebaseConfig = {
   apiKey: "AIzaSyDRnkAIYNXsKq77wE53y0qh2f92TT4zhxE",
@@ -904,54 +923,55 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const REF = db.ref('imjang');
+const RECORDS_ROOT = db.ref('imjang_records');
 
-const KEY = 'imjang_data';
-let D = JSON.parse(localStorage.getItem(KEY) || '{}');
-
-if (!D.step1) D.step1 = {};
-if (!D.step2) D.step2 = { units: [] };
-if (!D.step3) D.step3 = { slots: [{},{},{},{}] };
-if (!D.step4) D.step4 = { reviews: [{},{},{},{}] };
-if (!D.step5) D.step5 = {};
-if (!D.step6) D.step6 = { units: [], food: {} };
-if (!D.doneDongs) D.doneDongs = [];
-if (!D.archivedDongs) D.archivedDongs = [];
+// 모든 동네 기록을 담는 맵 { recordId: data }
+let allRecords = {};
 
 let selectedGu = null;
 let currentSideTab = 'overview';
 let priceChart = null;
 
-REF.on('value', (snapshot) => {
+RECORDS_ROOT.on('value', (snapshot) => {
   const remote = snapshot.val();
-  if (!remote) return;
-  D = remote;
-  localStorage.setItem(KEY, JSON.stringify(D));
+  allRecords = remote || {};
   updateStats();
   colorMap();
   if (selectedGu) loadSidePanel(selectedGu);
-  showToast('🔄 데이터 업데이트됨');
 });
 
+/* ─── 통계: 모든 기록 집계 ─── */
 function updateStats() {
-  const conquered = D.doneDongs?.length || 0;
-  const pending = D.step5?.dday && !D.step5.done ? 1 : 0;
-  const units = D.step2?.units?.length || 0;
+  const records = Object.values(allRecords);
+  const conquered = records.filter(r => r.step5?.done).length;
+  const pending   = records.filter(r => r.step5?.dday && !r.step5?.done).length;
+  const units     = records.reduce((acc, r) => acc + (r.step2?.units?.length || 0), 0);
+
   document.getElementById('stat-conquered').textContent = conquered;
-  document.getElementById('stat-pending').textContent = pending + (D.step3?.slots?.filter(s=>s.name).length ? 1 : 0);
+  document.getElementById('stat-pending').textContent = pending;
   document.getElementById('stat-units').textContent = units;
+
   const pct = ((conquered / 424) * 100).toFixed(1);
-  document.getElementById('conquest-fill').style.width = Math.min(pct * 20, 100) + '%';
+  document.getElementById('conquest-fill').style.width = Math.min(parseFloat(pct) * 20, 100) + '%';
   document.getElementById('conquest-pct').textContent = pct + '%';
 }
 
+/* ─── 구(區) 상태: 해당 구의 모든 기록 중 최고 상태 반환 ─── */
 function getGuStatus(guName) {
-  const currentGu = D.step1?.gu;
-  if (!currentGu) return 'untouched';
-  if (D.step5?.done && currentGu === guName) return 'conquered';
-  if (D.step5?.dday && currentGu === guName) return 'pending';
-  if (D.step1?.dong && currentGu === guName) return 'exploring';
+  const records = Object.values(allRecords).filter(r => r.step1?.gu === guName);
+  if (!records.length) return 'untouched';
+  if (records.some(r => r.step5?.done))  return 'conquered';
+  if (records.some(r => r.step5?.dday))  return 'pending';
+  if (records.some(r => r.step1?.dong))  return 'exploring';
   return 'untouched';
+}
+
+/* ─── 구에 속한 모든 기록 반환 ─── */
+function getGuRecords(guName) {
+  return Object.entries(allRecords)
+    .filter(([, r]) => r.step1?.gu === guName)
+    .map(([id, r]) => ({ id, ...r }))
+    .sort((a, b) => (b.lastUpdatedAt || '') > (a.lastUpdatedAt || '') ? 1 : -1);
 }
 
 const statusColors = {
@@ -989,27 +1009,16 @@ function switchSideTab(tab) {
   if (selectedGu) loadSidePanel(selectedGu);
 }
 
+/* ── 사이드패널: 구 클릭 시 해당 구 기록 목록 또는 단일 기록 표시 ── */
+let selectedRecordId = null; // 사이드패널에서 선택된 기록 ID
+
 function loadSidePanel(gu) {
   const content = document.getElementById('side-content');
-  const isCurrentGu = D.step1?.gu === gu;
+  const guRecords = getGuRecords(gu);
   const status = getGuStatus(gu);
 
-  if (currentSideTab === 'overview') {
-    content.innerHTML = renderOverview(gu, status, isCurrentGu);
-    if (isCurrentGu && D.step2?.units?.length) setTimeout(() => renderPriceChart(), 50);
-  } else if (currentSideTab === 'units') {
-    content.innerHTML = renderUnits(gu, isCurrentGu);
-  } else if (currentSideTab === 'insights') {
-    content.innerHTML = renderInsights(gu, isCurrentGu);
-  }
-}
-
-function renderOverview(gu, status, isCurrent) {
-  const statusLabel = { untouched:'미탐색', exploring:'탐색 중', pending:'발품 대기', conquered:'정복 완료' };
-  const statusBadge = { untouched:'badge', exploring:'badge green', pending:'badge gold', conquered:'badge accent' };
-
-  if (!isCurrent) {
-    return `<div class="dong-header">
+  if (!guRecords.length) {
+    content.innerHTML = `<div class="dong-header">
       <div class="dong-title">${gu}</div>
       <div class="dong-badges"><span class="badge">미탐색 구역</span></div>
     </div>
@@ -1017,19 +1026,77 @@ function renderOverview(gu, status, isCurrent) {
       아직 이 구에 대한 임장 기록이 없어요.<br>
       <a href="form.html" style="color:var(--accent);">손품 입력 →</a> 에서 ${gu} 데이터를 시작하세요.
     </div>`;
+    return;
   }
 
-  const s1 = D.step1 || {};
-  const s2 = D.step2 || {};
-  const s5 = D.step5 || {};
-  const dong = s1.dong || '';
+  // 기록이 여러 개면 — 선택된 기록 없으면 목록 먼저 표시
+  if (guRecords.length > 1 && !selectedRecordId) {
+    content.innerHTML = renderRecordList(gu, guRecords);
+    return;
+  }
+
+  // 선택된 기록 ID 또는 첫 번째 기록 사용
+  const rec = guRecords.find(r => r.id === selectedRecordId) || guRecords[0];
+
+  if (currentSideTab === 'overview') {
+    content.innerHTML = renderOverview(gu, status, rec, guRecords.length);
+    if (rec.step2?.units?.length) setTimeout(() => renderPriceChart(rec), 50);
+  } else if (currentSideTab === 'units') {
+    content.innerHTML = renderUnits(gu, rec);
+  } else if (currentSideTab === 'insights') {
+    content.innerHTML = renderInsights(gu, rec);
+  }
+}
+
+/* ── 구에 여러 동 기록이 있을 때 목록 표시 ── */
+function renderRecordList(gu, records) {
+  const statusLabel = { untouched:'미탐색', exploring:'탐색 중', pending:'발품 대기', conquered:'정복 완료' };
+  const statusBadge = { untouched:'badge', exploring:'badge', pending:'badge gold', conquered:'badge accent' };
+
+  return `
+    <div class="dong-header">
+      <div class="dong-title">${gu}</div>
+      <div class="dong-badges"><span class="badge">${records.length}개 동네 기록</span></div>
+    </div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:12px;">동네를 선택하면 상세 기록을 볼 수 있어요.</div>
+    ${records.map(r => {
+      const st = r.step5?.done ? 'conquered' : r.step5?.dday ? 'pending' : r.step1?.dong ? 'exploring' : 'untouched';
+      return `<div class="unit-mini-card" onclick="selectRecord('${r.id}', '${gu}')">
+        <div class="unit-mini-top">
+          <div class="unit-mini-name">📍 ${r.step1?.dong || '(동네 미선정)'}</div>
+          <span class="${statusBadge[st]}" style="font-size:11px;">${statusLabel[st]}</span>
+        </div>
+        <div style="font-size:12px;color:var(--text2);">
+          ${r.step2?.units?.length ? `단지 ${r.step2.units.length}개 분석` : '단지 미분석'}
+          ${r.lastUpdatedAt ? ` · ${r.lastUpdatedAt}` : ''}
+        </div>
+      </div>`;
+    }).join('')}
+    <a href="form.html" class="action-btn primary" style="margin-top:12px;">＋ 새 동네 기록 시작</a>
+  `;
+}
+
+function selectRecord(id, gu) {
+  selectedRecordId = id;
+  loadSidePanel(gu);
+}
+
+/* ── 개요 탭 ── */
+function renderOverview(gu, status, rec, totalRecords) {
+  const statusLabel = { untouched:'미탐색', exploring:'탐색 중', pending:'발품 대기', conquered:'정복 완료' };
+  const statusBadge = { untouched:'badge', exploring:'badge green', pending:'badge gold', conquered:'badge accent' };
+
+  const s1 = rec.step1 || {};
+  const s2 = rec.step2 || {};
+  const s5 = rec.step5 || {};
   const subways = s1.subway || [];
   const doubleStation = subways.length >= 2;
   const dday = s5.dday ? calcDday(s5.dday) : null;
 
   return `
+    ${totalRecords > 1 ? `<button onclick="selectedRecordId=null;loadSidePanel('${gu}')" style="background:none;border:none;color:var(--accent);font-size:12px;cursor:pointer;margin-bottom:12px;padding:0;">← ${gu} 전체 목록</button>` : ''}
     <div class="dong-header">
-      <div class="dong-title">${gu} · ${dong}</div>
+      <div class="dong-title">${gu} · ${s1.dong || ''}</div>
       <div class="dong-badges">
         <span class="${statusBadge[status]}">${statusLabel[status]}</span>
         ${doubleStation ? '<span class="badge accent">🚇 더블 역세권</span>' : ''}
@@ -1075,36 +1142,36 @@ function renderOverview(gu, status, isCurrent) {
       </div>
       ${s5.naverLink ? `<a href="${s5.naverLink}" target="_blank" class="action-btn">🏃‍♂️ 네이버 지도로 동선 열기</a>` : ''}
     </div>` : ''}
-    ${D.step6?.food?.name ? `<div class="info-section">
+    ${rec.step6?.food?.name ? `<div class="info-section">
       <div class="info-section-title">🍽️ 이번 임장 맛집</div>
       <div class="info-block">
-        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🎁 ${D.step6.food.name}</div>
-        ${D.step6.food.menu ? `<div style="font-size:12px;color:var(--text2);">추천 메뉴: ${D.step6.food.menu}</div>` : ''}
-        ${D.step6.food.memo ? `<div style="font-size:12px;color:var(--text3);margin-top:4px;">${D.step6.food.memo}</div>` : ''}
+        <div style="font-size:15px;font-weight:600;margin-bottom:4px;">🎁 ${rec.step6.food.name}</div>
+        ${rec.step6.food.menu ? `<div style="font-size:12px;color:var(--text2);">추천 메뉴: ${rec.step6.food.menu}</div>` : ''}
+        ${rec.step6.food.memo ? `<div style="font-size:12px;color:var(--text3);margin-top:4px;">${rec.step6.food.memo}</div>` : ''}
       </div>
     </div>` : ''}
     <a href="form.html" class="action-btn primary">✏️ 입력 폼에서 수정하기</a>
   `;
 }
 
-function renderUnits(gu, isCurrent) {
-  if (!isCurrent) return `<div style="color:var(--text3);font-size:13px;padding:20px 0;">이 구의 단지 기록이 없어요.</div>`;
-  const slots = D.step3?.slots || [];
+/* ── 단지 분석 탭 ── */
+function renderUnits(gu, rec) {
+  const slots = rec.step3?.slots || [];
   if (!slots.some(s => s.name)) return `<div style="color:var(--text3);font-size:13px;padding:20px 0;">3단계에서 타깃 단지를 선정하면 여기에 표시됩니다.</div>`;
 
   const SLOT_ICONS = ['👑','🏢','🏢','💰'];
   return `
-    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">${D.step1?.dong || ''} 핵심 타깃 단지</div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:14px;">${rec.step1?.dong || ''} 핵심 타깃 단지</div>
     ${slots.map((s,i) => {
       if (!s.name) return '';
-      const rv = D.step4?.reviews?.[i] || {};
-      const fu = D.step6?.units?.[i] || {};
+      const rv = rec.step4?.reviews?.[i] || {};
+      const fu = rec.step6?.units?.[i] || {};
       const avgScore = fu.traffic || fu.school || fu.commerce || fu.env
         ? ((parseInt(fu.traffic||0) + parseInt(fu.school||0) + parseInt(fu.commerce||0) + parseInt(fu.env||0)) / 4).toFixed(1)
         : null;
       const gap = (s.sale && s.lease) ? (parseFloat(s.sale) - parseFloat(s.lease)).toFixed(1) : null;
       const ppu = (s.pyeong && s.sale) ? Math.round(parseFloat(s.sale) * 10000 / parseFloat(s.pyeong)) : s.ppu || null;
-      return `<div class="unit-mini-card" onclick="openUnitModal(${i})">
+      return `<div class="unit-mini-card" onclick="openUnitModal(${i}, '${rec.id}')">
         <div class="unit-mini-top">
           <div class="unit-mini-name">${SLOT_ICONS[i]} ${s.name}</div>
           ${avgScore ? `<div style="font-size:12px;color:var(--gold);">★ ${avgScore}</div>` : ''}
@@ -1121,11 +1188,11 @@ function renderUnits(gu, isCurrent) {
   `;
 }
 
-function renderInsights(gu, isCurrent) {
-  if (!isCurrent) return `<div style="color:var(--text3);font-size:13px;padding:20px 0;">이 구의 인사이트 기록이 없어요.</div>`;
-  const slots = D.step3?.slots || [];
-  const reviews = D.step4?.reviews || [];
-  const fu = D.step6?.units || [];
+/* ── 인사이트 탭 ── */
+function renderInsights(gu, rec) {
+  const slots = rec.step3?.slots || [];
+  const reviews = rec.step4?.reviews || [];
+  const fu = rec.step6?.units || [];
 
   let html = '';
   slots.forEach((s,i) => {
@@ -1140,18 +1207,18 @@ function renderInsights(gu, isCurrent) {
     </div>`;
   });
 
-  if (D.step5?.memo) {
+  if (rec.step5?.memo) {
     html += `<div style="background:var(--surf2);border-radius:var(--r-sm);padding:14px;margin-bottom:12px;">
       <div style="font-size:12px;color:var(--text3);margin-bottom:6px;">최종 메모</div>
-      <div style="font-size:13px;color:var(--text);line-height:1.6;">${D.step5.memo}</div>
+      <div style="font-size:13px;color:var(--text);line-height:1.6;">${rec.step5.memo}</div>
     </div>`;
   }
 
   return html || `<div style="color:var(--text3);font-size:13px;padding:20px 0;">4단계 후기 수집 및 발품 기록이 완료되면 인사이트가 쌓입니다.</div>`;
 }
 
-function renderPriceChart() {
-  const units = (D.step2?.units || []).filter(u => u.name && u.sale);
+function renderPriceChart(rec) {
+  const units = (rec?.step2?.units || []).filter(u => u.name && u.sale);
   if (!units.length) return;
   const sorted = [...units].sort((a,b) => parseFloat(b.sale||0) - parseFloat(a.sale||0));
   const ctx = document.getElementById('price-chart');
@@ -1180,10 +1247,12 @@ function renderPriceChart() {
 const SLOT_ICONS = ['👑','🏢','🏢','💰'];
 const SLOT_LABELS = ['지역 대장','우량 단지①','우량 단지②','가성비 단지'];
 
-function openUnitModal(idx) {
-  const s = D.step3?.slots?.[idx] || {};
-  const rv = D.step4?.reviews?.[idx] || {};
-  const fu = D.step6?.units?.[idx] || {};
+function openUnitModal(idx, recordId) {
+  const rec = recordId ? allRecords[recordId] : null;
+  if (!rec) return;
+  const s = rec.step3?.slots?.[idx] || {};
+  const rv = rec.step4?.reviews?.[idx] || {};
+  const fu = rec.step6?.units?.[idx] || {};
   if (!s.name) return;
 
   const ppu = (s.pyeong && s.sale)
@@ -1247,25 +1316,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-updateStats();
-colorMap();
-
-if (D.step1?.gu) {
-  selectedGu = D.step1.gu;
-  const guEl = document.querySelector(`[data-gu="${D.step1.gu}"]`);
-  if (guEl) {
-    guEl.setAttribute('stroke-width','2.5');
-    guEl.setAttribute('stroke','#3d7fff');
-    loadSidePanel(D.step1.gu);
-  }
-}
-
-if (D.step5?.done && !sessionStorage.getItem('toastShown')) {
-  setTimeout(() => {
-    showToast(`🎉 ${D.step1?.dong || ''} 정복 완료! 서울 정복률 ${((D.doneDongs?.length||1) / 424 * 100).toFixed(1)}% 달성!`);
-    sessionStorage.setItem('toastShown','1');
-  }, 800);
-}
+// 초기 렌더는 RECORDS_ROOT.on('value') 콜백이 담당
 
 /* ═══════════════════════════════════════════
    VIEW SWITCHING
@@ -1304,6 +1355,7 @@ let glossaryData = JSON.parse(localStorage.getItem(GLOSSARY_KEY) || JSON.stringi
 ]));
 
 let selectedConso = '전체';
+let editingGlossaryId = null;
 
 function saveGlossary() {
   localStorage.setItem(GLOSSARY_KEY, JSON.stringify(glossaryData));
@@ -1338,6 +1390,14 @@ function filterByConsonant(c) {
   renderGlossary();
 }
 
+function submitGlossaryForm() {
+  if (editingGlossaryId !== null) {
+    saveGlossaryEdit();
+  } else {
+    addGlossaryItem();
+  }
+}
+
 function addGlossaryItem() {
   const term = document.getElementById('g-term').value.trim();
   const meaning = document.getElementById('g-meaning').value.trim();
@@ -1353,6 +1413,53 @@ function addGlossaryItem() {
   document.getElementById('g-meaning').value = '';
   renderGlossary();
   showToast(`✅ "${term}" 등록 완료`);
+}
+
+function startEditGlossary(id) {
+  const item = glossaryData.find(g => g.id === id);
+  if (!item) return;
+
+  editingGlossaryId = id;
+
+  document.getElementById('g-term').value = item.term;
+  document.getElementById('g-meaning').value = item.meaning;
+  document.getElementById('g-category').value = item.category;
+
+  document.getElementById('g-form-title').textContent = '✏️ 용어 수정';
+  document.getElementById('g-submit-btn').textContent = '저장하기';
+  document.getElementById('g-cancel-btn').style.display = 'block';
+
+  // 사이드바로 스크롤
+  document.querySelector('.glossary-sidebar').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function saveGlossaryEdit() {
+  const term = document.getElementById('g-term').value.trim();
+  const meaning = document.getElementById('g-meaning').value.trim();
+  const category = document.getElementById('g-category').value;
+
+  if (!term || !meaning) { showToast('⚠️ 용어명과 설명을 입력해주세요'); return; }
+
+  const idx = glossaryData.findIndex(g => g.id === editingGlossaryId);
+  if (idx !== -1) {
+    glossaryData[idx] = { id: editingGlossaryId, term, meaning, category };
+  }
+
+  saveGlossary();
+  cancelGlossaryEdit();
+  renderGlossary();
+  showToast(`✅ "${term}" 수정 완료`);
+}
+
+function cancelGlossaryEdit() {
+  editingGlossaryId = null;
+
+  document.getElementById('g-term').value = '';
+  document.getElementById('g-meaning').value = '';
+
+  document.getElementById('g-form-title').textContent = '📘 용어 등록';
+  document.getElementById('g-submit-btn').textContent = '＋ 용어 등록하기';
+  document.getElementById('g-cancel-btn').style.display = 'none';
 }
 
 function deleteGlossaryItem(id) {
@@ -1414,6 +1521,7 @@ function renderGlossary() {
         <div class="glossary-card-meaning">${g.meaning}</div>
       </div>
       <div class="glossary-card-actions">
+        <button class="icon-btn" onclick="startEditGlossary(${g.id})" title="수정">✏️</button>
         <button class="icon-btn danger" onclick="deleteGlossaryItem(${g.id})" title="삭제">🗑</button>
       </div>
     </div>`;
@@ -1517,6 +1625,7 @@ function deletePolicyItem(id) {
 
 function renderPolicy() {
   const showAbandoned = document.getElementById('show-abolished').checked;
+  const searchQuery = (document.getElementById('p-search')?.value || '').toLowerCase();
   const container = document.getElementById('policy-content');
 
   // Count abolished
@@ -1526,10 +1635,20 @@ function renderPolicy() {
     ? `폐지된 정책 ${abolishedCount}건 ${showAbandoned ? '표시 중' : '숨김'}`
     : '';
 
-  if (!policyData.length) {
+  // Apply search filter
+  let filteredData = policyData;
+  if (searchQuery) {
+    filteredData = policyData.filter(p =>
+      p.name.toLowerCase().includes(searchQuery) ||
+      (p.memo || '').toLowerCase().includes(searchQuery) ||
+      p.admin.toLowerCase().includes(searchQuery)
+    );
+  }
+
+  if (!filteredData.length) {
     container.innerHTML = `<div class="policy-empty">
       <div class="icon">⚖️</div>
-      <div style="font-size:13px;margin-top:4px;">등록된 정책이 없습니다.<br>상단의 <strong>+ 정책 추가</strong> 버튼으로 첫 정책을 입력해보세요.</div>
+      <div style="font-size:13px;margin-top:4px;">${searchQuery ? '검색 결과가 없습니다.' : '등록된 정책이 없습니다.<br>상단의 <strong>+ 정책 추가</strong> 버튼으로 첫 정책을 입력해보세요.'}</div>
     </div>`;
     return;
   }
@@ -1537,7 +1656,7 @@ function renderPolicy() {
   // Group by admin, preserve order of first appearance
   const adminOrder = [];
   const grouped = {};
-  policyData.forEach(p => {
+  filteredData.forEach(p => {
     if (!grouped[p.admin]) {
       grouped[p.admin] = [];
       adminOrder.push(p.admin);

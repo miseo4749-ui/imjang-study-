@@ -615,7 +615,24 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
 <!-- TOP NAV -->
 <div class="topnav">
   <div class="topnav-logo">🏘 임장노트 <span>손품·발품 입력</span></div>
-  <div style="display:flex;align-items:center;gap:12px;">
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+    <!-- 현재 동네 배지 -->
+    <div id="record-badge-wrap" style="position:relative;">
+      <button onclick="toggleRecordPanel()" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:9999px;border:1.5px solid var(--border);background:var(--surf2);font-family:inherit;font-size:13px;font-weight:600;color:var(--text);cursor:pointer;">
+        <span id="record-badge-text">📍 로딩 중...</span>
+        <span style="font-size:10px;color:var(--text3);">▾</span>
+      </button>
+      <!-- 동네 목록 패널 -->
+      <div id="record-panel" style="display:none;position:absolute;top:calc(100% + 8px);right:0;min-width:260px;background:var(--surf);border:1px solid var(--border);border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,0.12);z-index:200;overflow:hidden;">
+        <div style="padding:14px 16px;border-bottom:1px solid var(--border);font-size:12px;color:var(--text3);font-weight:600;">기록된 임장 목록</div>
+        <div id="record-list" style="max-height:260px;overflow-y:auto;padding:8px;"></div>
+        <div style="padding:10px;border-top:1px solid var(--border);">
+          <button onclick="startNewRecord()" style="width:100%;padding:10px;border-radius:9999px;border:none;background:var(--accent);color:#fff;font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;">
+            ＋ 새 동네 임장 시작
+          </button>
+        </div>
+      </div>
+    </div>
     <div class="user-badge">
       <div class="user-avatar" id="nav-avatar">?</div>
       <span class="user-name" id="nav-username">로딩 중...</span>
@@ -624,6 +641,8 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
     <a href="dashboard.html" class="topnav-links" style="padding:6px 14px;border-radius:6px;font-size:13px;color:var(--text2);text-decoration:none;">대시보드 →</a>
   </div>
 </div>
+<!-- 패널 닫기 오버레이 -->
+<div id="record-panel-overlay" onclick="closeRecordPanel()" style="display:none;position:fixed;inset:0;z-index:190;"></div>
 
 <!-- STEP TABS -->
 <div class="step-wrap">
@@ -1126,57 +1145,218 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
-const REF = db.ref('imjang');
+
+// ════════════════════════════════
+// 동네별 독립 기록 시스템
+// ════════════════════════════════
+const RECORDS_ROOT = db.ref('imjang_records');
+const LEGACY_REF   = db.ref('imjang'); // 기존 데이터 경로 (마이그레이션 용)
+const RECORD_ID_KEY = 'imjang_active_record';
+
+let activeRecordId = localStorage.getItem(RECORD_ID_KEY);
+let REF = activeRecordId ? RECORDS_ROOT.child(activeRecordId) : LEGACY_REF;
+let _realtimeUnsub = null; // 실시간 리스너 해제 함수
+
+function subscribeRecord(ref) {
+  if (_realtimeUnsub) _realtimeUnsub(); // 기존 리스너 해제
+  const handler = ref.on('value', (snapshot) => {
+    const remote = snapshot.val();
+    if (!remote) return;
+    isSyncing = true;
+    D = remote;
+    applyDefaults();
+    localStorage.setItem(KEY, JSON.stringify(D));
+    loadStepData(currentStep);
+    if (currentStep === 3) renderSlots();
+    if (currentStep === 4) renderReviewTabs();
+    if (currentStep === 6) renderFieldTabs();
+    refreshDoneTabs();
+    updateRecordBadge();
+    const status = document.getElementById('save-status');
+    status.textContent = '🔄 ' + (D.lastUpdatedBy || '친구') + '님이 업데이트했어요';
+    status.className = 'save-status saved';
+    setTimeout(() => { isSyncing = false; }, 300);
+  });
+  _realtimeUnsub = () => ref.off('value', handler);
+}
+
+// ── 새 임장 시작 ──
+function startNewRecord() {
+  closeRecordPanel();
+  if (!confirm('새 동네 임장을 시작할까요?\n현재 기록은 목록에 보관됩니다.')) return;
+  const newId = 'record_' + Date.now();
+  localStorage.setItem(RECORD_ID_KEY, newId);
+  activeRecordId = newId;
+  REF = RECORDS_ROOT.child(newId);
+  D = makeDefaultD();
+  localStorage.setItem(KEY, JSON.stringify(D));
+  subscribeRecord(REF);
+  [1,2,3,4,5,6].forEach(n => {
+    const tab = document.querySelector(`[data-step="${n}"]`);
+    if (tab) { tab.classList.remove('done','active'); }
+  });
+  goStep(1);
+  updateRecordBadge();
+  showToast('✅ 새 임장 시작! 1단계에서 동네를 선택해주세요.');
+}
+
+// ── 기존 기록 열기 ──
+function openRecord(id) {
+  closeRecordPanel();
+  localStorage.setItem(RECORD_ID_KEY, id);
+  activeRecordId = id;
+  REF = RECORDS_ROOT.child(id);
+  REF.once('value', (snap) => {
+    D = snap.val() || makeDefaultD();
+    applyDefaults();
+    localStorage.setItem(KEY, JSON.stringify(D));
+    subscribeRecord(REF);
+    loadStepData(1);
+    goStep(1);
+    priceRows = (D.step2?.units || []).map(r => ({...r, id: r.id || Date.now()+Math.random()}));
+    refreshDoneTabs();
+    updateRecordBadge();
+    showToast('📁 ' + (D.step1?.dong || '기록') + ' 불러왔습니다');
+  });
+}
+
+// ── 기록 목록 패널 ──
+function toggleRecordPanel() {
+  const panel = document.getElementById('record-panel');
+  const overlay = document.getElementById('record-panel-overlay');
+  const isOpen = panel.style.display !== 'none';
+  if (isOpen) { closeRecordPanel(); return; }
+  panel.style.display = 'block';
+  overlay.style.display = 'block';
+  loadRecordList();
+}
+function closeRecordPanel() {
+  document.getElementById('record-panel').style.display = 'none';
+  document.getElementById('record-panel-overlay').style.display = 'none';
+}
+function loadRecordList() {
+  const listEl = document.getElementById('record-list');
+  listEl.innerHTML = '<div style="padding:8px;font-size:12px;color:var(--text3);">로딩 중...</div>';
+  RECORDS_ROOT.once('value', (snap) => {
+    const records = snap.val() || {};
+    const entries = Object.entries(records).filter(([k]) => !k.startsWith('_'));
+    if (!entries.length) {
+      listEl.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--text3);">기록이 없습니다.</div>';
+      return;
+    }
+    // 최신순 정렬
+    entries.sort((a,b) => (b[1].lastUpdatedAt || '') > (a[1].lastUpdatedAt || '') ? 1 : -1);
+    listEl.innerHTML = entries.map(([id, data]) => {
+      const gu   = data.step1?.gu   || '';
+      const dong = data.step1?.dong || '(동네 미선정)';
+      const done = data.step5?.done ? '✅' : '📝';
+      const isActive = id === activeRecordId;
+      return `<div onclick="openRecord('${id}')" style="
+        padding:10px 12px;border-radius:10px;cursor:pointer;margin-bottom:4px;
+        background:${isActive ? 'var(--accent-glow)' : 'transparent'};
+        border:1px solid ${isActive ? 'var(--accent)' : 'transparent'};
+        transition:background 0.15s;
+        display:flex;align-items:center;justify-content:space-between;gap:8px;"
+        onmouseover="this.style.background='var(--surf2)'"
+        onmouseout="this.style.background='${isActive ? 'var(--accent-glow)' : 'transparent'}'">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:var(--text);">${done} ${gu} ${dong}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${data.lastUpdatedAt || ''}</div>
+        </div>
+        ${isActive ? '<span style="font-size:10px;color:var(--accent);font-weight:700;">현재</span>' : ''}
+      </div>`;
+    }).join('');
+  });
+}
+
+// ── 배지 업데이트 ──
+function updateRecordBadge() {
+  const el = document.getElementById('record-badge-text');
+  if (!el) return;
+  const dong = D.step1?.dong;
+  const gu   = D.step1?.gu;
+  el.textContent = dong ? `📍 ${gu} ${dong}` : '📍 동네 선택';
+}
+
+function makeDefaultD() {
+  return {
+    step1: {gu:'',dong:'',id:'',reasonType:'',familiarity:'',reason:'',subway:[],park:[],landmark:[]},
+    step2: {avgPrice:'',leaseRate:'',units:[]},
+    step3: {slots:[{},{},{},{}]},
+    step4: {reviews:[{},{},{},{}]},
+    step5: {dday:'',start:'',naverLink:'',route:'',memo:'',done:false},
+    step6: {units:[{},{},{},{}],food:{}},
+    doneDongs: [],
+    archivedDongs: []
+  };
+}
+function applyDefaults() {
+  if (!D.step1) D.step1 = {gu:'',dong:'',id:'',reasonType:'',familiarity:'',reason:'',subway:[],park:[],landmark:[]};
+  if (!D.step2) D.step2 = {avgPrice:'',leaseRate:'',units:[]};
+  if (!D.step3) D.step3 = {slots:[{},{},{},{}]};
+  if (!D.step4) D.step4 = {reviews:[{},{},{},{}]};
+  if (!D.step5) D.step5 = {dday:'',start:'',naverLink:'',route:'',memo:'',done:false};
+  if (!D.step6) D.step6 = {units:[{},{},{},{}],food:{}};
+  if (!D.doneDongs) D.doneDongs = [];
+  if (!D.archivedDongs) D.archivedDongs = [];
+}
 
 // ────────────────────────────────
 // DATA MODEL
 // ────────────────────────────────
 const KEY = 'imjang_data';
 let D = JSON.parse(localStorage.getItem(KEY) || '{}');
-let isSyncing = false; // Firebase → 로컬 반영 중 플래그
+let isSyncing = false;
+applyDefaults();
 
-// defaults
-if (!D.step1) D.step1 = { gu:'', dong:'', id:'', reasonType:'', familiarity:'', reason:'', subway:[], park:[], landmark:[] };
-if (!D.step2) D.step2 = { avgPrice:'', leaseRate:'', units:[] };
-if (!D.step3) D.step3 = { slots: [{},{},{},{}] };
-if (!D.step4) D.step4 = { reviews: [{},{},{},{}] };
-if (!D.step5) D.step5 = { dday:'', start:'', naverLink:'', route:'', memo:'', done:false };
-if (!D.step6) D.step6 = { units:[{},{},{},{}], food:{} };
-if (!D.doneDongs) D.doneDongs = [];
-
-// Firebase 실시간 수신 — 친구가 저장하면 내 화면도 자동 반영
-REF.on('value', (snapshot) => {
-  const remote = snapshot.val();
-  if (!remote) return;
-  isSyncing = true;
-  D = remote;
-  localStorage.setItem(KEY, JSON.stringify(D));
-  // 현재 열린 스텝 UI 갱신
-  loadStepData(currentStep);
-  if (currentStep === 3) renderSlots();
-  if (currentStep === 4) renderReviewTabs();
-  if (currentStep === 6) renderFieldTabs();
-  // 탭 done 상태 갱신
-  refreshDoneTabs();
-  const status = document.getElementById('save-status');
-  const updater = D.lastUpdatedBy || '친구';
-  if (!isSyncing) return; // 내가 저장한 건 아래 save()에서 처리
-  status.textContent = '🔄 ' + updater + '님이 업데이트했어요';
-  status.className = 'save-status saved';
-  setTimeout(() => { isSyncing = false; }, 300);
-});
+// 첫 실행: 기존 imjang 데이터 자동 마이그레이션
+if (!activeRecordId) {
+  LEGACY_REF.once('value', (snap) => {
+    const legacy = snap.val();
+    if (legacy && legacy.step1?.dong) {
+      // 기존 데이터가 있으면 records로 이동
+      const migrateId = legacy.step1.id || ('legacy_' + Date.now());
+      RECORDS_ROOT.child(migrateId).set(legacy).then(() => {
+        localStorage.setItem(RECORD_ID_KEY, migrateId);
+        activeRecordId = migrateId;
+        REF = RECORDS_ROOT.child(migrateId);
+        D = legacy;
+        applyDefaults();
+        localStorage.setItem(KEY, JSON.stringify(D));
+        subscribeRecord(REF);
+        updateRecordBadge();
+        showToast('📦 기존 합정동 기록을 목록으로 이동했어요');
+      });
+    } else {
+      // 기존 데이터 없음 → 새 레코드 ID 할당
+      const newId = 'record_' + Date.now();
+      localStorage.setItem(RECORD_ID_KEY, newId);
+      activeRecordId = newId;
+      REF = RECORDS_ROOT.child(newId);
+      subscribeRecord(REF);
+    }
+  });
+} else {
+  subscribeRecord(REF);
+}
 
 function save() {
-  // 작성자 기록
+  // 아직 record id가 없으면 할당 (안전장치)
+  if (!activeRecordId) {
+    const newId = D.step1?.id || ('record_' + Date.now());
+    localStorage.setItem(RECORD_ID_KEY, newId);
+    activeRecordId = newId;
+    REF = RECORDS_ROOT.child(newId);
+    subscribeRecord(REF);
+  }
   D.lastUpdatedBy = currentUser || '익명';
   D.lastUpdatedAt = new Date().toLocaleTimeString('ko-KR');
-  // 로컬 저장
   localStorage.setItem(KEY, JSON.stringify(D));
-  // Firebase 저장
   REF.set(D).then(() => {
     const status = document.getElementById('save-status');
     status.textContent = '✅ ' + (currentUser || '익명') + ' · ' + D.lastUpdatedAt + ' 저장됨';
     status.className = 'save-status saved';
+    updateRecordBadge();
   }).catch((err) => {
     console.error(err);
     document.getElementById('save-status').textContent = '⚠️ 저장 실패 — 인터넷 확인';
@@ -1839,23 +2019,7 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// Firebase 실시간 수신
-REF.on('value', function(snapshot) {
-  var remote = snapshot.val();
-  if (!remote) return;
-  isSyncing = true;
-  D = remote;
-  localStorage.setItem(KEY, JSON.stringify(D));
-  loadStepData(currentStep);
-  if (currentStep === 3) renderSlots();
-  if (currentStep === 4) renderReviewTabs();
-  if (currentStep === 6) renderFieldTabs();
-  refreshDoneTabs();
-  var status = document.getElementById('save-status');
-  status.textContent = 'friend updated ' + new Date().toLocaleTimeString('ko-KR');
-  status.className = 'save-status saved';
-  setTimeout(function() { isSyncing = false; }, 300);
-});
+// 실시간 수신은 subscribeRecord()가 담당 — 구형 REF.on 제거됨
 
 // init
 loadStepData(1);
@@ -2192,9 +2356,9 @@ function updateCLItem(type, section, key, field, value) {
   const data = getClData(type, section);
   if (!data[key]) data[key] = {};
   data[key][field] = value;
-  // 메모를 입력하면 자동으로 완료 처리
-  if (field === 'memo' && value && value.trim()) {
-    data[key].checked = true;
+  // 메모 입력 여부로 완료 처리
+  if (field === 'memo') {
+    data[key].checked = !!(value && value.trim());
   }
   save();
   refreshCLProgress(type, section);
@@ -2211,7 +2375,7 @@ function refreshCLProgress(type, section) {
   const def = type === 'rd' ? RD_CL : NRD_CL;
   const items = def[section]?.items || [];
   const data  = getClData(type, section);
-  const checked = items.filter(([k]) => data[k]?.checked).length;
+  const checked = items.filter(([k]) => isDone(data[k])).length;
   const total   = items.length;
   const pct     = total ? (checked / total) * 100 : 0;
   const progEl  = document.getElementById(`cl-prog-${type}-${section}`);
@@ -2253,9 +2417,13 @@ function restoreAccordions() {
 // ════════════════════════════════
 // 체크리스트 섹션 렌더
 // ════════════════════════════════
+function isDone(item) {
+  // 메모가 있거나 명시적으로 체크된 경우 완료
+  return !!(item?.checked || (item?.memo && item.memo.trim()));
+}
 function renderCLSection(type, sKey, def, data) {
   const items   = def.items;
-  const checked = items.filter(([k]) => data[k]?.checked).length;
+  const checked = items.filter(([k]) => isDone(data[k])).length;
   const total   = items.length;
   const pct     = total ? (checked / total) * 100 : 0;
   const progCls = checked === total && total > 0 ? ' done' : checked > 0 ? ' partial' : '';
