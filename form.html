@@ -784,11 +784,13 @@ textarea.fi { resize: vertical; min-height: 80px; line-height: 1.6; }
       <div class="frow col2">
         <div class="fg">
           <label>평균 평당가 (만원)</label>
-          <input class="fi" id="s2-avg-price" type="number" placeholder="예: 5500">
+          <input class="fi" id="s2-avg-price" type="number" placeholder="예: 5500 (자동 계산)"
+            oninput="this._userEdited = this.value !== ''">
         </div>
         <div class="fg">
           <label>평균 전세가율 (%)</label>
-          <input class="fi" id="s2-lease-rate" type="number" placeholder="예: 55">
+          <input class="fi" id="s2-lease-rate" type="number" placeholder="예: 55 (자동 계산)"
+            oninput="this._userEdited = this.value !== ''">
         </div>
       </div>
     </div>
@@ -1301,9 +1303,16 @@ function applyDefaults() {
   if (!D.step1) D.step1 = {gu:'',dong:'',id:'',reasonType:'',familiarity:'',reason:'',subway:[],park:[],landmark:[]};
   if (!D.step2) D.step2 = {avgPrice:'',leaseRate:'',units:[]};
   if (!D.step3) D.step3 = {slots:[{},{},{},{}]};
+  // Firebase는 빈 객체 {}를 null로 저장하므로 slots 배열 보정
+  if (!D.step3.slots || !Array.isArray(D.step3.slots)) D.step3.slots = [{},{},{},{}];
+  else D.step3.slots = D.step3.slots.map(s => s || {});
   if (!D.step4) D.step4 = {reviews:[{},{},{},{}]};
+  if (!D.step4.reviews || !Array.isArray(D.step4.reviews)) D.step4.reviews = [{},{},{},{}];
+  else D.step4.reviews = D.step4.reviews.map(r => r || {});
   if (!D.step5) D.step5 = {dday:'',start:'',naverLink:'',route:'',memo:'',done:false};
   if (!D.step6) D.step6 = {units:[{},{},{},{}],food:{}};
+  if (!D.step6.units || !Array.isArray(D.step6.units)) D.step6.units = [{},{},{},{}];
+  else D.step6.units = D.step6.units.map(u => u || {});
   if (!D.doneDongs) D.doneDongs = [];
   if (!D.archivedDongs) D.archivedDongs = [];
 }
@@ -1574,11 +1583,40 @@ function calcGap(r) {
 }
 function updateRow(id, key, val) {
   const r = priceRows.find(r => r.id == id);
-  if (r) { r[key] = val; renderPriceTable(); }
+  if (!r) return;
+  r[key] = val;
+  renderPriceTable();
+  calcAndFillAvg();
+  // 세대수 변경 시 3단계 슬롯 동기화
+  if (key === 'units' && r.name && D.step3?.slots) {
+    D.step3.slots.forEach(slot => {
+      if (slot.name === r.name) slot.units = val;
+    });
+  }
 }
 function removeRow(id) {
   priceRows = priceRows.filter(r => r.id != id);
   renderPriceTable();
+  calcAndFillAvg();
+}
+
+/* 평균 평당가 & 전세가율 자동 계산 */
+function calcAndFillAvg() {
+  const validRows = priceRows.filter(r => parseFloat(r.sale) && parseFloat(r.pyeong));
+  const validLease = priceRows.filter(r => parseFloat(r.sale) && parseFloat(r.lease));
+
+  if (validRows.length) {
+    const avgPPU = Math.round(validRows.reduce((s, r) => s + parsePPU(r), 0) / validRows.length);
+    const el = document.getElementById('s2-avg-price');
+    if (el && !el._userEdited) el.value = avgPPU;
+  }
+  if (validLease.length) {
+    const avgLease = (validLease.reduce((s, r) => {
+      return s + (parseFloat(r.lease) / parseFloat(r.sale)) * 100;
+    }, 0) / validLease.length).toFixed(1);
+    const el = document.getElementById('s2-lease-rate');
+    if (el && !el._userEdited) el.value = avgLease;
+  }
 }
 
 // ────────────────────────────────
@@ -1691,7 +1729,7 @@ function openPickPopup(slotIdx) {
 function pickUnit(rowId) {
   const r = priceRows.find(r => r.id == rowId);
   if (r && pickingSlotIdx >= 0) {
-    D.step3.slots[pickingSlotIdx] = { name:r.name, pyeong:r.pyeong, sale:r.sale, lease:r.lease, units:'', built:'', floor_ratio:'' };
+    D.step3.slots[pickingSlotIdx] = { name:r.name, pyeong:r.pyeong, sale:r.sale, lease:r.lease, units:r.units||'', built:'', floor_ratio:'' };
     save(); renderSlots();
   }
   closePopup();
@@ -1782,11 +1820,15 @@ function renderFieldTabs() {
   }
   renderMemoInline();
 
+  // currentUnitIdx 유효성 보정
+  const _namedSlots = slots.map((s,i) => s.name ? i : -1).filter(i => i >= 0);
+  if (!_namedSlots.includes(currentUnitIdx)) currentUnitIdx = _namedSlots[0] ?? 0;
+
   tabs.innerHTML = slots.map((s,i) => {
     if (!s.name) return '';
     const fu = D.step6.units[i] || {};
     const authorTag = fu.author ? ` <span style="font-size:10px;color:var(--green);"> · ${fu.author}</span>` : '';
-    return `<button class="unit-tab ${i===0?'active':''}" onclick="switchFieldTab(${i})">${s.name}${authorTag}</button>`;
+    return `<button class="unit-tab ${i===currentUnitIdx?'active':''}" onclick="switchFieldTab(${i})">${s.name}${authorTag}</button>`;
   }).join('');
 
   contents.innerHTML = slots.map((s,i) => {
@@ -1799,7 +1841,7 @@ function renderFieldTabs() {
         ${cons.map(c => `<div style="font-size:13px;color:var(--text2);margin-bottom:4px;">• ${c} 직접 눈으로 확인</div>`).join('')}
       </div>` : '';
     const fu = D.step6.units[i] || {};
-    return `<div class="unit-tab-content ${i===0?'active':''}" id="field-content-${i}">
+    return `<div class="unit-tab-content ${i===currentUnitIdx?'active':''}" id="field-content-${i}">
       ${riskHtml}
       <div class="form-section">
         <div class="form-section-title">⭐ 현장 별점</div>
