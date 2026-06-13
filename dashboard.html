@@ -8,37 +8,41 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <style>
 :root {
-  --bg: #0c0f1a;
-  --surf: #131729;
-  --surf2: #1c2235;
-  --surf3: #252d42;
-  --surf4: #2e3850;
-  --border: #2a3348;
-  --accent: #3d7fff;
-  --accent-glow: #3d7fff22;
-  --gold: #f5b731;
-  --gold-dim: #f5b73115;
-  --green: #2ecc8f;
-  --green-dim: #2ecc8f15;
-  --red: #f05c5c;
-  --red-dim: #f05c5c15;
-  --purple: #a78bfa;
-  --purple-dim: #a78bfa18;
-  --text: #e4e8f4;
-  --text2: #8892aa;
-  --text3: #4a5470;
-  --r: 10px;
-  --r-sm: 6px;
+  --bg: #f5f2ee;
+  --surf: #ffffff;
+  --surf2: #faf8f5;
+  --surf3: #f0ece6;
+  --surf4: #e8e2da;
+  --border: #ddd8d0;
+  --accent: #e8457a;
+  --accent-glow: #e8457a18;
+  --gold: #e8a020;
+  --gold-dim: #e8a02018;
+  --green: #28a87a;
+  --green-dim: #28a87a15;
+  --red: #e83448;
+  --red-dim: #e8344815;
+  --purple: #8460f5;
+  --purple-dim: #8460f515;
+  --text: #1a1614;
+  --text2: #5a5250;
+  --text3: #a09890;
+  --r: 12px;
+  --r-sm: 8px;
 
-  --color-untouched: #1c2235;
-  --color-exploring: #2a3d1a;
-  --color-pending: #3d3010;
-  --color-conquered: #1a2e50;
+  --color-untouched: #f0ece6;
+  --color-exploring: #d4edda;
+  --color-pending: #fde8be;
+  --color-conquered: #c8dcf5;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
   font-family: 'Noto Sans KR', sans-serif;
   background: var(--bg);
+  background-image:
+    linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
   color: var(--text);
   height: 100vh;
   overflow: hidden;
@@ -55,15 +59,15 @@ body {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 24px; flex-shrink: 0;
 }
-.topnav-logo { font-size: 15px; font-weight: 700; color: var(--gold); }
+.topnav-logo { font-size: 16px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
 .nav-links { display: flex; gap: 6px; }
 .nav-link {
-  padding: 6px 14px; border-radius: var(--r-sm); font-size: 13px;
+  padding: 6px 16px; border-radius: 9999px; font-size: 13px;
   color: var(--text2); text-decoration: none; cursor: pointer;
-  transition: all 0.15s; border: none; background: none; font-family: inherit;
+  transition: all 0.15s; border: none; background: none; font-family: inherit; font-weight: 500;
 }
 .nav-link:hover { background: var(--surf3); color: var(--text); }
-.nav-link.here { background: var(--surf3); color: var(--accent); font-weight: 500; }
+.nav-link.here { background: var(--accent); color: #fff; font-weight: 600; box-shadow: 0 2px 8px var(--accent-glow); }
 
 /* ─── STATS BAR ─── */
 .stats-bar {
@@ -546,6 +550,66 @@ body {
 .policy-empty .icon { font-size: 40px; margin-bottom: 12px; }
 
 .abolished-hidden { display: none !important; }
+
+/* ═══════════════════════════════════
+   PLM 스타일 오버라이드
+═══════════════════════════════════ */
+
+/* 네비 그림자 */
+.topnav { box-shadow: 0 1px 0 var(--border), 0 2px 12px rgba(0,0,0,0.06); }
+
+/* 스탯바 */
+.stats-bar { box-shadow: 0 1px 0 var(--border); }
+.stat-num { font-weight: 900; }
+.conquest-pct { color: var(--accent); }
+.conquest-bar-fill { background: linear-gradient(90deg, var(--accent), var(--gold)); }
+
+/* 사이드 패널 */
+.side-panel { box-shadow: -2px 0 12px rgba(0,0,0,0.06); }
+.side-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* 배지 & 태그 */
+.badge { border: 1px solid var(--border); }
+.badge.accent { background: var(--accent-glow); color: var(--accent); border-color: var(--accent); }
+.badge.gold { background: var(--gold-dim); color: var(--gold); border-color: var(--gold); }
+.badge.green { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+
+/* 정보 블록 */
+.info-block { border: 1px solid var(--border); box-shadow: 0 1px 4px rgba(0,0,0,0.04); }
+.unit-mini-card { box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.unit-mini-card:hover { border-color: var(--accent); box-shadow: 0 2px 12px var(--accent-glow); }
+
+/* 액션 버튼 필 모양 */
+.action-btn { border-radius: 9999px; font-weight: 500; }
+.action-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.action-btn.primary:hover { opacity: 0.88; }
+.action-btn:hover { border-color: var(--accent); }
+
+/* 모달 */
+.modal { box-shadow: 0 8px 40px rgba(0,0,0,0.14); border-radius: 20px; }
+.modal-close:hover { color: var(--accent); }
+
+/* 토스트 */
+.toast { border-radius: 9999px; font-weight: 600; }
+
+/* 사이드 탭 */
+.side-tab { font-weight: 500; }
+
+/* 용어사전 */
+.submit-btn { border-radius: 9999px; }
+.conso-btn { border-radius: 9999px; }
+.conso-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.glossary-card { border-radius: 14px; box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
+.glossary-card:hover { box-shadow: 0 3px 14px rgba(0,0,0,0.1); border-color: var(--border); }
+.section-title { font-weight: 900; }
+
+/* 정책 타임라인 */
+.policy-add-btn { border-radius: 9999px; }
+.policy-card { border-radius: 14px; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
+.policy-card.active-policy { border-left: 3px solid var(--green); }
+
+/* 지도 빈 상태 */
+.empty-side .icon { font-size: 44px; }
 </style>
 </head>
 <body>
@@ -600,11 +664,17 @@ body {
         <svg id="seoul-svg" viewBox="0 0 800 700" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <filter id="glow">
-              <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+              <feGaussianBlur stdDeviation="2.5" result="coloredBlur"/>
               <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
             </filter>
+            <filter id="glow-pink">
+              <feFlood flood-color="#e8457a" flood-opacity="0.3" result="pink"/>
+              <feComposite in="pink" in2="SourceGraphic" operator="in" result="tinted"/>
+              <feGaussianBlur in="tinted" stdDeviation="3" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
           </defs>
-          <g id="map-gu-group" stroke="#2a3348" stroke-width="1.2" fill="#1c2235">
+          <g id="map-gu-group" stroke="#ccc8c0" stroke-width="1.2" fill="#f0ece6">
             <polygon class="gu-region" data-gu="은평구" points="180,80 240,70 260,110 250,150 210,160 175,140 160,110" />
             <polygon class="gu-region" data-gu="도봉구" points="340,50 400,45 420,90 390,120 350,115 320,85" />
             <polygon class="gu-region" data-gu="노원구" points="400,45 470,40 490,85 460,120 420,115 390,120 400,80" />
@@ -631,7 +701,7 @@ body {
             <polygon class="gu-region" data-gu="금천구" points="165,435 210,420 235,445 230,485 195,500 160,485" />
             <polygon class="gu-region" data-gu="관악구" points="215,360 265,348 295,365 295,415 260,440 215,430 200,400" />
           </g>
-          <g id="map-label-group" font-size="9" fill="#4a5470" text-anchor="middle" pointer-events="none">
+          <g id="map-label-group" font-size="9" fill="#8a8580" text-anchor="middle" pointer-events="none" font-weight="600">
             <text x="210" y="125">은평구</text>
             <text x="370" y="82">도봉구</text>
             <text x="438" y="82">노원구</text>
@@ -659,14 +729,14 @@ body {
             <text x="252" y="400">관악구</text>
           </g>
           <path d="M 130,275 Q 200,285 270,280 Q 330,278 390,265 Q 450,255 520,262 Q 560,266 590,275"
-                fill="none" stroke="#1a3a5f" stroke-width="14" opacity="0.6"/>
-          <text x="350" y="290" font-size="9" fill="#2a5080" text-anchor="middle">한강</text>
+                fill="none" stroke="#90c4e8" stroke-width="14" opacity="0.55"/>
+          <text x="350" y="290" font-size="9" fill="#60a0d0" text-anchor="middle" font-weight="600">한강</text>
         </svg>
         <div class="map-overlay-label">
-          <div class="legend-item"><div class="legend-dot" style="background:#1c2235;border:1px solid #2a3348"></div> 미탐색</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#2a4d1a"></div> 탐색 중</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#4a3d10"></div> 발품 대기</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#1a3a70"></div> 정복 완료</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#f0ece6;border:1px solid #ccc8c0"></div> 미탐색</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c8e8cc;border:1px solid #a0c8a4"></div> 탐색 중</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fde8be;border:1px solid #f0c878"></div> 발품 대기</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#c8dcf5;border:1px solid #90b8e0"></div> 정복 완료</div>
         </div>
         <div id="dong-pins" style="position:absolute;inset:0;pointer-events:none;"></div>
       </div>
@@ -885,10 +955,10 @@ function getGuStatus(guName) {
 }
 
 const statusColors = {
-  untouched: '#1c2235',
-  exploring: '#2a4d1a',
-  pending: '#4a3d10',
-  conquered: '#1a3a70',
+  untouched: '#f0ece6',
+  exploring: '#c8e8cc',
+  pending:   '#fde8be',
+  conquered: '#c8dcf5',
 };
 
 function colorMap() {
@@ -896,7 +966,8 @@ function colorMap() {
     const gu = el.dataset.gu;
     const status = getGuStatus(gu);
     el.style.fill = statusColors[status];
-    if (status === 'conquered') el.style.filter = 'url(#glow)';
+    if (status === 'conquered') el.style.filter = 'url(#glow-pink)';
+    else el.style.filter = '';
   });
 }
 
