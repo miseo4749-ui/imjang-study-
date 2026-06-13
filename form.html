@@ -1649,8 +1649,9 @@ function switchFieldTab(idx) {
   document.querySelectorAll('#field-tab-contents .unit-tab-content').forEach(c => c.classList.remove('active'));
   document.querySelectorAll('#field-unit-tabs .unit-tab')[idx]?.classList.add('active');
   document.getElementById(`field-content-${idx}`)?.classList.add('active');
-  // 단지 전환 → 해당 단지의 체크리스트 + 현장메모 재렌더
+  // 단지 전환 → 아코디언 초기화 후 해당 단지 체크리스트 + 현장메모 재렌더
   currentUnitIdx = idx;
+  openAccordions.clear();
   const im = getImjang();
   if (im.areaType) renderMainChecklist(im.areaType);
   renderMemoInline();
@@ -2118,6 +2119,7 @@ function renderMainChecklist(type) {
     html += renderVerdictCLSection('nrd') + renderVerdictInputSection('nrd');
   }
   target.innerHTML = html;
+  restoreAccordions(); // 재렌더 후 열려있던 아코디언 복원
 }
 
 // ── 현장 메모 인라인 렌더 ──
@@ -2190,6 +2192,12 @@ function updateCLItem(type, section, key, field, value) {
   const data = getClData(type, section);
   if (!data[key]) data[key] = {};
   data[key][field] = value;
+  // 메모를 입력하면 자동으로 체크
+  if (field === 'memo' && value && value.trim()) {
+    data[key].checked = true;
+    const cb = document.getElementById(`cb-${type}-${section}-${key}`);
+    if (cb) cb.checked = true;
+  }
   save();
   refreshCLProgress(type, section);
 }
@@ -2220,12 +2228,28 @@ function refreshCLProgress(type, section) {
 // ════════════════════════════════
 // 아코디언 토글
 // ════════════════════════════════
+// 열린 아코디언 ID 기억 — 재렌더 후에도 상태 유지
+const openAccordions = new Set();
+
 function toggleAccordion(id) {
   const body  = document.getElementById('cl-body-' + id);
   const arrow = document.getElementById('cl-arr-' + id);
   if (!body) return;
   const open = body.classList.toggle('open');
   if (arrow) arrow.classList.toggle('open', open);
+  if (open) openAccordions.add(id);
+  else openAccordions.delete(id);
+}
+
+function restoreAccordions() {
+  openAccordions.forEach(id => {
+    const body  = document.getElementById('cl-body-' + id);
+    const arrow = document.getElementById('cl-arr-' + id);
+    if (body && !body.classList.contains('open')) {
+      body.classList.add('open');
+      if (arrow) arrow.classList.add('open');
+    }
+  });
 }
 
 // ════════════════════════════════
@@ -2243,10 +2267,10 @@ function renderCLSection(type, sKey, def, data) {
     const safeVal = (item.memo || '').replace(/"/g, '&quot;');
     return `<div class="cl-item">
       <div class="cl-item-row">
-        <input type="checkbox" class="cl-cb" ${item.checked ? 'checked' : ''}
+        <input type="checkbox" class="cl-cb" id="cb-${type}-${sKey}-${key}" ${item.checked ? 'checked' : ''}
           onchange="updateCLItem('${type}','${sKey}','${key}','checked',this.checked)">
         <label class="cl-item-label${important ? ' important' : ''}"
-          onclick="this.previousElementSibling.click()">${label}</label>
+          for="cb-${type}-${sKey}-${key}">${label}</label>
         <button class="cl-flag-btn${item.needCheck ? ' flagged' : ''}"
           onclick="toggleCLFlag('${type}','${sKey}','${key}',this)">
           ${item.needCheck ? '🔖 확인필요' : '확인필요'}
@@ -2254,7 +2278,7 @@ function renderCLSection(type, sKey, def, data) {
       </div>
       <div class="cl-memo-wrap">
         <input type="text" class="cl-memo-input" value="${safeVal}"
-          placeholder="메모..." onchange="updateCLItem('${type}','${sKey}','${key}','memo',this.value)">
+          placeholder="메모 입력 시 자동 체크됩니다" onchange="updateCLItem('${type}','${sKey}','${key}','memo',this.value)">
       </div>
     </div>`;
   }).join('');
